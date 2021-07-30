@@ -13,7 +13,10 @@ public:
 	unsigned int getOpcode(std::string code);
 
 	std::vector<std::string> file;
+
 	std::vector<std::string> names;
+	std::vector<unsigned int> namesReference;
+
 	std::vector<std::variant<int, double, std::string>> stack;
 
 	bool isWhitespace(char chr);

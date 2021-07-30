@@ -68,7 +68,7 @@ void ByteInterpreter::interpret()
 				stack.push_back(file.at(instruction + 1));
 			break;
 		case LOAD_NAME:
-
+			names.push_back(file.at())
 		}
 	}
 }
