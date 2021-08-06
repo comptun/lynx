@@ -2,11 +2,11 @@
 
 #include <string>
 #include <vector>
-#include <variant>
 #include <fstream>
 #include <string>
 #include <iostream>
 
+#include "pcfunctions.h"
 #include "byteinterpreter.h"
 
 class Lynx : public ByteInterpreter {

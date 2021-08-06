@@ -2,23 +2,38 @@
 
 #include <string>
 #include <vector>
-#include <variant>
 #include <fstream>
 #include <string>
 #include <iostream>
 
-class ByteInterpreter {
+#include "pcfunctions.h"
+
+class ByteInterpreter : public PCFunctions{
 public:
 
+	size_t instruction;
+	size_t secondaryInstruction;
+
+	bool conditional;
+
 	unsigned int getOpcode(std::string code);
+	size_t getNameReference(std::string name);
 
 	std::vector<std::string> file;
 
-	std::vector<std::string> names;
-	std::vector<unsigned int> namesReference;
+	struct Names {
+		std::vector<std::string> identifier;
+		std::vector<unsigned int> reference;
+	};
 
-	std::vector<std::variant<int, double, std::string>> stack;
+	Names names;
 
+	//std::vector<std::variant<int, double, std::string>> stack;
+	std::vector<int> stack;
+
+	void executePCF(std::string funcName);
+
+	bool doesNameExist(std::string name);
 	bool isWhitespace(char chr);
 	bool isInteger(std::string num);
 	bool isFloat(std::string num);

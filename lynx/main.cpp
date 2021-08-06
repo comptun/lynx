@@ -1,12 +1,14 @@
 #include "lynx.h"
 #include "byteinterpreter.h"
+#include "main.h"
+#include <time.h>
+
+Lynx lynx;
 
 int main()
 {
-	Lynx lynx;
+	srand(time(NULL));
 	lynx.readFile(std::ifstream("bytecode.txt"));
-	for (size_t i = 0; i < lynx.file.size(); ++i) {
-		std::cout << lynx.file.at(i) << " ";
-	}
+	lynx.interpret();
 	std::cin.get();
 }
