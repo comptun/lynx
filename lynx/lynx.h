@@ -8,9 +8,8 @@
 
 #include "pcfunctions.h"
 #include "byteinterpreter.h"
-#include "translator.h"
 
-class Lynx : public ByteInterpreter, public Translator {
+class Lynx : public ByteInterpreter {
 public:
 	Lynx();
 };
