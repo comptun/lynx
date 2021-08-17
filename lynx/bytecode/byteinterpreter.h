@@ -5,10 +5,11 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <variant>
 
 #include "pcfunctions.h"
 
-class ByteInterpreter : public PCFunctions{
+class ByteInterpreter : public PCFunctions {
 public:
 
 	size_t instruction;

@@ -38,7 +38,7 @@ void ByteInterpreter::executePCF(std::string funcName)
         stack.at(stack.at(stack.size() - 2)) = item2;
         stack.at(stack.at(stack.size() - 1)) = item1;
         break;
-        }
+    }
     case SQRT:
         stack.push_back(sqrt(stack.back()));
         break;
@@ -50,5 +50,6 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     case INPUT:
         std::cin >> stack.at(stack.back());
+        break;
     }
 }

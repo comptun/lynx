@@ -23,6 +23,8 @@ std::vector<std::string> opcodes = {
 	"LOAD_ARRAY",
 	"LOAD_ARRAY_REF",
 	"STORE_ARRAY",
+	"PUSH_ARRAY",
+	"POP_BACK",
 };
 
 unsigned int ByteInterpreter::getOpcode(std::string code)

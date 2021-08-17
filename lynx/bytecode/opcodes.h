@@ -22,6 +22,8 @@ enum opcodeIndex {
 	LOAD_ARRAY,
 	LOAD_ARRAY_REF,
 	STORE_ARRAY,
+	PUSH_ARRAY,
+	POP_BACK,
 
 	ERROR = 404,
 };

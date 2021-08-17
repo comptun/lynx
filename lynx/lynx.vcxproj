@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -103,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,15 +142,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="byteinterpreter.cpp" />
+    <ClCompile Include="bytecode\byteinterpreter.cpp" />
+    <ClCompile Include="interpreter\interpreter.cpp" />
+    <ClCompile Include="interpreter\lexer.cpp" />
     <ClCompile Include="lynx.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="opcodes.cpp" />
+    <ClCompile Include="bytecode\opcodes.cpp" />
+    <ClCompile Include="bytecode\pcfunctions.cpp" />
+    <ClCompile Include="bytecode\print.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="byteinterpreter.h" />
+    <ClInclude Include="bytecode\byteinterpreter.h" />
+    <ClInclude Include="interpreter\interpreter.h" />
+    <ClInclude Include="interpreter\lexer.h" />
     <ClInclude Include="lynx.h" />
-    <ClInclude Include="opcodes.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="bytecode\opcodes.h" />
+    <ClInclude Include="bytecode\pcfunctions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

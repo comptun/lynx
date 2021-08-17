@@ -1,5 +1,5 @@
 #include "byteinterpreter.h"
-#include "lynx.h"
+#include "../lynx.h"
 #include "opcodes.h"
 
 #include <string>
@@ -190,25 +190,44 @@ void ByteInterpreter::interpret()
 			instruction = secondaryInstruction;
 			secondaryInstruction = 0;
 			break;
-		case LOAD_ARRAY:
-			stack.push_back(stack.at(getNameReference(file.at(instruction + 1)) + stack.back() + 1));
+		case LOAD_ARRAY: {
+			int foundIdentifiers = 0;
+			for (size_t j = 0; j < names.reference.size(); ++j) {
+				if (names.identifier.at(j) == file.at(instruction + 1))
+					++foundIdentifiers;
+				if (foundIdentifiers == stack.at(stack.size() - 1)) {
+					stack.push_back(stack.at(names.reference.at(j)));
+					break;
+				}
+			}
 			break;
+		}
 		case LOAD_ARRAY_REF:
 			 stack.push_back(getNameReference(file.at(instruction + 1)) + stack.back() + 1);
 			 break;
 		case STORE_ARRAY: {
 			if (doesNameExist(file.at(instruction + 1))) {
-				stack.at(getNameReference(file.at(instruction + 1)) + stack.back() + 1) = stack.at(stack.size() - 2);
-				break;
+				int foundIdentifiers = 0;
+				for (size_t j = 0; j < names.reference.size(); ++j) {
+					if (names.identifier.at(j) == file.at(instruction + 1))
+						++foundIdentifiers;
+					if (foundIdentifiers == stack.at(stack.size() - 1)) {
+						stack.at(names.reference.at(j) - 1) = stack.at(stack.size() - 2);
+						break;
+					}
+				}
 			}
-			int size = stack.back();
+			stack.push_back(1);
 			names.identifier.push_back(file.at(instruction + 1));
 			names.reference.push_back(stack.size());
-			for (size_t j = 0; j < size; ++j) {
-				stack.push_back(0);
-			}
 			break;
 		}
+		case PUSH_ARRAY: {
+			std::cout << stack.at(names.reference.at(getNameReference(file.at(instruction + 1))));
+			break;
+		}
+		case POP_BACK:
+			stack.pop_back();
 		}
 	}
 }

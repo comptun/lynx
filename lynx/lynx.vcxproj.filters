@@ -18,24 +18,48 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="byteinterpreter.cpp">
+    <ClCompile Include="bytecode\byteinterpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="lynx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="opcodes.cpp">
+    <ClCompile Include="bytecode\opcodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode\pcfunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode\print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter\interpreter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interpreter\lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="byteinterpreter.h">
+    <ClInclude Include="bytecode\byteinterpreter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lynx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="opcodes.h">
+    <ClInclude Include="bytecode\opcodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode\pcfunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpreter\interpreter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="interpreter\lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

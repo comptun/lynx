@@ -6,11 +6,11 @@
 #include <string>
 #include <iostream>
 
-#include "pcfunctions.h"
-#include "byteinterpreter.h"
-#include "translator.h"
+#include "bytecode/pcfunctions.h"
+#include "bytecode/byteinterpreter.h"
+#include "interpreter/interpreter.h"
 
-class Lynx : public ByteInterpreter, public Translator {
+class Lynx : public ByteInterpreter, public Interpreter {
 public:
 	Lynx();
 };
