@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 
+std::vector<std::string> file;
+
 bool ByteInterpreter::isInteger(std::string num)
 {
 	for (size_t i = 0; i < num.size(); ++i) {

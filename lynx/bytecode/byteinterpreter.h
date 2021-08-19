@@ -5,9 +5,10 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <variant>
 
 #include "pcfunctions.h"
+
+extern std::vector<std::string> file;
 
 class ByteInterpreter : public PCFunctions {
 public:
@@ -19,8 +20,6 @@ public:
 
 	unsigned int getOpcode(std::string code);
 	size_t getNameReference(std::string name);
-
-	std::vector<std::string> file;
 
 	struct Names {
 		std::vector<std::string> identifier;
