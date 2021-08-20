@@ -25,6 +25,9 @@ std::vector<std::string> opcodes = {
 	"STORE_ARRAY",
 	"PUSH_ARRAY",
 	"POP_BACK",
+	"LOAD_PARAM_CONST",
+	"LOAD_PARAM_NAME",
+	"STORE_PARAM_NAME",
 };
 
 unsigned int ByteInterpreter::getOpcode(std::string code)

@@ -10,17 +10,24 @@ extern std::vector<std::string> tokenTypes;
 enum tokenEnum {
 	IF,
 	WHILE_LOOP,
+	FOR_LOOP,
+	AND,
+	FUNCTION,
+	FUNCTION_END,
 	EQUALS,
 	PLUS_EQUALS,
 	MINUS_EQUALS,
 	DIVIDE_EQUALS,
 	MULTIPLY_EQUALS,
+	MOD_EQUALS,
+	COLON,
 	NAME,
 	CONSTANT_VALUE,
 	LBRACKET,
 	RBRACKET,
 	ENDIF,
 	ENDWHILE,
+	BREAK,
 };
 
 class Lexer {

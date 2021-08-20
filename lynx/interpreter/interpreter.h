@@ -8,7 +8,8 @@
 
 class Interpreter : public Lexer {
 public:
-	std::vector<size_t> jumpInstruction;
+	std::vector<std::vector<size_t>> jumpInstruction;
+	std::vector<size_t> breakJump;
 	int getToken(std::string str);
 	void translate();
 };

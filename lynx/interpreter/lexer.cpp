@@ -3,33 +3,47 @@
 std::vector<std::string> tokenNames = {
 	"if",
 	"while",
+	"for",
+	"and",
+	"function",
+	"endfunction",
 	"=",
 	"+=",
 	"-=",
 	"/=",
 	"*=",
+	"%=",
+	":",
 	"NAME",
 	"CONSTANT_VALUE",
 	"(",
 	")",
 	"endif",
 	"endwhile",
+	"break"
 };
 
 std::vector<std::string> tokenTypes = {
 	"IF_STATEMENT",
 	"WHILE_LOOP",
+	"FOR_LOOP",
+	"AND",
+	"FUNCTION",
+	"END_FUNCTION",
 	"EQUALS",
 	"PLUS_EQUALS",
 	"MINUS_EQUALS",
 	"DIVIDE_EQUALS",
 	"MULTIPLY_EQUALS",
+	"MOD_EQUALS",
+	"COLON",
 	"NAME",
 	"CONSTANT_VALUE",
 	"LBRACKET",
 	"RBRACKET",
 	"ENDIF",
 	"ENDWHILE",
+	"BREAK",
 };
 
 bool Lexer::isInteger(std::string num)

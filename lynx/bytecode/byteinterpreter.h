@@ -14,12 +14,13 @@ class ByteInterpreter : public PCFunctions {
 public:
 
 	size_t instruction;
-	size_t secondaryInstruction;
+	std::vector<size_t> secondaryInstruction;
 
 	bool conditional;
 
 	unsigned int getOpcode(std::string code);
 	size_t getNameReference(std::string name);
+	size_t getParamNameReference(std::string name);
 
 	struct Names {
 		std::vector<std::string> identifier;
@@ -27,9 +28,11 @@ public:
 	};
 
 	Names names;
+	Names paramNames;
 
 	//std::vector<std::variant<int, double, std::string>> stack;
 	std::vector<int> stack;
+	std::vector<int> paramStack;
 
 	void executePCF(std::string funcName);
 

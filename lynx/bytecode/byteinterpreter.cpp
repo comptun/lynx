@@ -82,6 +82,15 @@ size_t ByteInterpreter::getNameReference(std::string name)
 	return 404; // 404 not found
 }
 
+size_t ByteInterpreter::getParamNameReference(std::string name)
+{
+	for (size_t i = 0; i < paramNames.identifier.size(); ++i) {
+		if (paramNames.identifier.at(i) == name)
+			return i;
+	}
+	return 404; // 404 not found
+}
+
 void ByteInterpreter::interpret()
 {
 	for (instruction = 0; instruction < file.size(); instruction += 2) {
@@ -156,7 +165,7 @@ void ByteInterpreter::interpret()
 				executePCF(file.at(instruction + 1));
 			}
 			if (doesNameExist(file.at(instruction + 1)) == true) {
-				secondaryInstruction = instruction;
+				secondaryInstruction.push_back(instruction);
 				for (size_t e = 0; e < file.size(); e += 2) {
 					if (file.at(e) == "START_FUNCTION" and file.at(e + 1) == file.at(instruction + 1)) {
 						instruction = e;
@@ -185,12 +194,12 @@ void ByteInterpreter::interpret()
 			for (; file.at(instruction) != "END_FUNCTION"; instruction += 2);
 			break;
 		case END_FUNCTION:
-			instruction = secondaryInstruction;
-			secondaryInstruction = 0;
+			instruction = secondaryInstruction.back();
+			secondaryInstruction.pop_back();
 			break;
 		case RETURN:
-			instruction = secondaryInstruction;
-			secondaryInstruction = 0;
+			instruction = secondaryInstruction.back();
+			secondaryInstruction.pop_back();
 			break;
 		case LOAD_ARRAY: {
 			int foundIdentifiers = 0;
@@ -230,6 +239,17 @@ void ByteInterpreter::interpret()
 		}
 		case POP_BACK:
 			stack.pop_back();
+			break;
+		case LOAD_PARAM_CONST:
+			paramStack.push_back(std::stoi(file.at(instruction + 1)));
+			break;
+		case LOAD_PARAM_NAME:
+			stack.push_back(paramStack.at(getParamNameReference(file.at(instruction + 1))));
+			break;
+		case STORE_PARAM_NAME:
+			names.identifier.push_back(file.at(instruction + 1));
+			names.reference.push_back(stack.size() - 1);
+			break;
 		}
 	}
 }
