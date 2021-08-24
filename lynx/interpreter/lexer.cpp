@@ -20,7 +20,9 @@ std::vector<std::string> tokenNames = {
 	")",
 	"endif",
 	"endwhile",
-	"break"
+	"break",
+	"{",
+	"}",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -44,6 +46,8 @@ std::vector<std::string> tokenTypes = {
 	"ENDIF",
 	"ENDWHILE",
 	"BREAK",
+	"LEFT_CURLY_BRACE",
+	"RIGHT_CURLY_BRACE",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -112,4 +116,5 @@ void Lexer::readCode(std::ifstream fileName)
 			lineContent += line.at(i);
 		}
 	}
+	fileName.close();
 }

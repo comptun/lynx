@@ -28,6 +28,8 @@ enum tokenEnum {
 	ENDIF,
 	ENDWHILE,
 	BREAK,
+	LEFT_CURLY_BRACE,
+	RIGHT_CURLY_BRACE,
 };
 
 class Lexer {

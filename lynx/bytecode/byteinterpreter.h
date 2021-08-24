@@ -33,6 +33,7 @@ public:
 	//std::vector<std::variant<int, double, std::string>> stack;
 	std::vector<int> stack;
 	std::vector<int> paramStack;
+	std::vector<std::vector<int>> arrayStack;
 
 	void executePCF(std::string funcName);
 
