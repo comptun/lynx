@@ -23,6 +23,10 @@ std::vector<std::string> tokenNames = {
 	"break",
 	"{",
 	"}",
+	"+",
+	"-",
+	"*",
+	"/",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -48,6 +52,10 @@ std::vector<std::string> tokenTypes = {
 	"BREAK",
 	"LEFT_CURLY_BRACE",
 	"RIGHT_CURLY_BRACE",
+	"PLUS",
+	"MINUS",
+	"MULTIPLY",
+	"DIVIDE",
 };
 
 bool Lexer::isInteger(std::string num)

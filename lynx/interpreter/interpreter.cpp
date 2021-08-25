@@ -9,6 +9,15 @@ int Interpreter::getToken(std::string str)
 	}
 }
 
+bool Interpreter::nameExists(std::string name)
+{
+	for (size_t i = 0; i < knownNames.size(); ++i) {
+		if (knownNames.at(i) == name)
+			return true;
+	}
+	return false;
+}
+
 void Interpreter::translate()
 {
 	file.push_back("LOAD_CONST");
@@ -166,6 +175,98 @@ void Interpreter::translate()
 			file.push_back("0");
 			++instruction;
 			break;
+		case PLUS:
+			file.push_back("LOAD_REF");
+			file.push_back("_VAR_TEMP_STORAGE");
+			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case NAME:
+				file.push_back("LOAD_NAME");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			case CONSTANT_VALUE:
+				file.push_back("LOAD_CONST");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			}
+			file.push_back("ADD");
+			file.push_back("0");
+			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+				file.push_back("LOAD_NAME");
+				file.push_back("_VAR_TEMP_STORAGE");
+				file.push_back("STORE_NAME");
+				file.push_back(currentName);
+			}
+			instruction += 2;
+			break;
+		case MINUS:
+			file.push_back("LOAD_REF");
+			file.push_back("_VAR_TEMP_STORAGE");
+			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case NAME:
+				file.push_back("LOAD_NAME");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			case CONSTANT_VALUE:
+				file.push_back("LOAD_CONST");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			}
+			file.push_back("SUB");
+			file.push_back("0");
+			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+				file.push_back("LOAD_NAME");
+				file.push_back("_VAR_TEMP_STORAGE");
+				file.push_back("STORE_NAME");
+				file.push_back(currentName);
+			}
+			instruction += 2;
+			break;
+		case MULTIPLY:
+			file.push_back("LOAD_REF");
+			file.push_back("_VAR_TEMP_STORAGE");
+			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case NAME:
+				file.push_back("LOAD_NAME");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			case CONSTANT_VALUE:
+				file.push_back("LOAD_CONST");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			}
+			file.push_back("MUL");
+			file.push_back("0");
+			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+				file.push_back("LOAD_NAME");
+				file.push_back("_VAR_TEMP_STORAGE");
+				file.push_back("STORE_NAME");
+				file.push_back(currentName);
+			}
+			instruction += 2;
+			break;
+		case DIVIDE:
+			file.push_back("LOAD_REF");
+			file.push_back("_VAR_TEMP_STORAGE");
+			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case NAME:
+				file.push_back("LOAD_NAME");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			case CONSTANT_VALUE:
+				file.push_back("LOAD_CONST");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			}
+			file.push_back("DIV");
+			file.push_back("0");
+			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+				file.push_back("LOAD_NAME");
+				file.push_back("_VAR_TEMP_STORAGE");
+				file.push_back("STORE_NAME");
+				file.push_back(currentName);
+			}
+			instruction += 2;
+			break;
 		case NAME:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case EQUALS:
@@ -179,8 +280,22 @@ void Interpreter::translate()
 					file.push_back(codeFile.token.at(instruction + 2));
 					break;
 				}
-				file.push_back("STORE_NAME");
-				file.push_back(codeFile.token.at(instruction));
+				if (codeFile.token.at(instruction + 3) != "+" and codeFile.token.at(instruction + 3) != "-" and codeFile.token.at(instruction + 3) != "*" and codeFile.token.at(instruction + 3) != "/") {
+					knownNames.push_back(codeFile.token.at(instruction));
+					file.push_back("STORE_NAME");
+					file.push_back(codeFile.token.at(instruction));
+				}
+				else {
+					currentName = codeFile.token.at(instruction);
+					file.push_back("STORE_NAME");
+					file.push_back("_VAR_TEMP_STORAGE");
+					if (nameExists(codeFile.token.at(instruction)) == false) {
+						file.push_back("LOAD_CONST");
+						file.push_back("0");
+						file.push_back("STORE_NAME");
+						file.push_back(codeFile.token.at(instruction));
+					}
+				}
 				instruction += 3;
 				break;
 			case PLUS_EQUALS:

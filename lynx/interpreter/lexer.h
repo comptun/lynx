@@ -30,6 +30,10 @@ enum tokenEnum {
 	BREAK,
 	LEFT_CURLY_BRACE,
 	RIGHT_CURLY_BRACE,
+	PLUS,
+	MINUS,
+	MULTIPLY,
+	DIVIDE,
 };
 
 class Lexer {
