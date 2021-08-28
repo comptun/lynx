@@ -18,14 +18,38 @@ bool Interpreter::nameExists(std::string name)
 	return false;
 }
 
+void Interpreter::preprocess()
+{
+	for (size_t i = 0; i < codeFile.token.size();) {
+		for (size_t j = 0; j < definitions.placeholder.size(); ++j) {
+			if (codeFile.token.at(i) == definitions.placeholder.at(j)) {
+				codeFile.token.at(i) = definitions.instruction.at(j);
+				retokenize(codeFile.token.at(i), i);
+				break;
+			}
+		}
+		if (codeFile.token.at(i) == "define") {
+			define(codeFile.token.at(i + 1), codeFile.token.at(i + 2));
+			i += 3;
+		}
+		else {
+			++i;
+		}
+	}
+}
+
 void Interpreter::translate()
 {
+	preprocess();
 	file.push_back("LOAD_CONST");
 	file.push_back("0");
 	file.push_back("STORE_NAME");
 	file.push_back("LYNX_START");
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
+		case DEFINE:
+			instruction += 3;
+			break;
 		case IF: {
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
@@ -269,6 +293,18 @@ void Interpreter::translate()
 			break;
 		case NAME:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case LEFT_CURLY_BRACE:
+				file.push_back("START_FUNCTION");
+				file.push_back(codeFile.token.at(instruction));
+				if (codeFile.token.at(instruction + 2) == ":") {
+					file.push_back("STORE_NAME");
+					file.push_back(codeFile.token.at(instruction + 3));
+					instruction += 4;
+					break;
+				}
+				statementType.push_back(FUNCTION_STATEMENT);
+				instruction += 2;
+				break;
 			case EQUALS:
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
@@ -355,7 +391,7 @@ void Interpreter::translate()
 			switch (statementType.back()) {
 			case IF_STATEMENT:
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
+					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size());
 				}
 				jumpInstruction.pop_back();
 				instruction += 1;

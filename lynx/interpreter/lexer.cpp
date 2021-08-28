@@ -27,6 +27,7 @@ std::vector<std::string> tokenNames = {
 	"-",
 	"*",
 	"/",
+	"define",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -56,6 +57,7 @@ std::vector<std::string> tokenTypes = {
 	"MINUS",
 	"MULTIPLY",
 	"DIVIDE",
+	"DEFINE",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -81,6 +83,21 @@ void Lexer::tokenize(std::string token)
 		return;
 	}
 	codeFile.type.push_back("NAME");
+}
+
+void Lexer::retokenize(std::string token, size_t pos)
+{
+	for (size_t i = 0; i < tokenNames.size(); ++i) {
+		if (tokenNames.at(i) == token) {
+			codeFile.type.at(pos) = tokenTypes.at(i);
+			return;
+		}
+	}
+	if (isInteger(token)) {
+		codeFile.type.at(pos) = "CONSTANT_VALUE";
+		return;
+	}
+	codeFile.type.at(pos) = "NAME";
 }
 
 bool Lexer::isWhitespace(char chr)

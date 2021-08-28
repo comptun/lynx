@@ -16,7 +16,7 @@ int main()
 	for (size_t i = 0; i < file.size(); i += 2) {
 		std::cout << file.at(i) << " " << file.at(i + 1) << std::endl;
 	}*/
-
+				
 	lynx.translate();
 	lynx.interpret();
 	std::cin.get();

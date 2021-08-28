@@ -166,11 +166,12 @@ void ByteInterpreter::interpret()
 			}
 			if (doesNameExist(file.at(instruction + 1)) == true) {
 				secondaryInstruction.push_back(instruction);
-				for (size_t e = 0; e < file.size(); e += 2) {
+				instruction = stack.at(getNameReference(file.at(instruction + 1)));
+				/*for (size_t e = 0; e < file.size(); e += 2) {
 					if (file.at(e) == "START_FUNCTION" and file.at(e + 1) == file.at(instruction + 1)) {
 						instruction = e;
 					}
-				}
+				}*/
 			}
 			break;
 		case ADD:
@@ -190,7 +191,8 @@ void ByteInterpreter::interpret()
 			break;
 		case START_FUNCTION:
 			names.identifier.push_back(file.at(instruction + 1));
-			names.reference.push_back(instruction);
+			names.reference.push_back(stack.size());
+			stack.push_back(instruction);
 			for (; file.at(instruction) != "END_FUNCTION"; instruction += 2);
 			break;
 		case END_FUNCTION:

@@ -145,6 +145,7 @@
     <ClCompile Include="bytecode\byteinterpreter.cpp" />
     <ClCompile Include="interpreter\interpreter.cpp" />
     <ClCompile Include="interpreter\lexer.cpp" />
+    <ClCompile Include="interpreter\preprocessor.cpp" />
     <ClCompile Include="lynx.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="bytecode\opcodes.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="bytecode\byteinterpreter.h" />
     <ClInclude Include="interpreter\interpreter.h" />
     <ClInclude Include="interpreter\lexer.h" />
+    <ClInclude Include="interpreter\preprocessor.h" />
     <ClInclude Include="lynx.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="bytecode\opcodes.h" />

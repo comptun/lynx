@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lexer.h"
+#include "preprocessor.h"
 
 #include <fstream>
 #include <vector>
@@ -12,13 +13,14 @@ enum statement {
 	FUNCTION_STATEMENT,
 };
 
-class Interpreter : public Lexer {
+class Interpreter : public Lexer, public Preprocessor {
 public:
 	std::string currentName;
 	std::vector<std::string> knownNames;
 	std::vector<std::vector<size_t>> jumpInstruction;
 	std::vector<int> statementType;
 	std::vector<size_t> breakJump;
+	void preprocess();
 	bool nameExists(std::string name);
 	int getToken(std::string str);
 	void translate();

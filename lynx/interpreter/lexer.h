@@ -34,6 +34,7 @@ enum tokenEnum {
 	MINUS,
 	MULTIPLY,
 	DIVIDE,
+	DEFINE,
 };
 
 class Lexer {
@@ -46,6 +47,7 @@ public:
 	File codeFile;
 	bool isInteger(std::string num);
 	void tokenize(std::string token);
+	void retokenize(std::string token, size_t pos);
 	bool isWhitespace(char chr);
 	void readCode(std::ifstream fileName);
 };
