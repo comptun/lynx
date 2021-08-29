@@ -15,6 +15,7 @@ enum tokenEnum {
 	FUNCTION,
 	FUNCTION_END,
 	EQUALS,
+	EQUAL_TO,
 	PLUS_EQUALS,
 	MINUS_EQUALS,
 	DIVIDE_EQUALS,
@@ -35,6 +36,7 @@ enum tokenEnum {
 	MULTIPLY,
 	DIVIDE,
 	DEFINE,
+	COMMA,
 };
 
 class Lexer {
@@ -45,7 +47,10 @@ public:
 		std::vector<int> indents;
 	};
 	File codeFile;
+	void removeBlankspace();
 	bool isInteger(std::string num);
+	bool special1Character(char character);
+	bool special2Character(char character, char character2);
 	void tokenize(std::string token);
 	void retokenize(std::string token, size_t pos);
 	bool isWhitespace(char chr);

@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include <iostream>
 
 std::vector<std::string> tokenNames = {
 	"if",
@@ -8,6 +9,7 @@ std::vector<std::string> tokenNames = {
 	"function",
 	"endfunction",
 	"=",
+	"==",
 	"+=",
 	"-=",
 	"/=",
@@ -28,6 +30,7 @@ std::vector<std::string> tokenNames = {
 	"*",
 	"/",
 	"define",
+	",",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -38,6 +41,7 @@ std::vector<std::string> tokenTypes = {
 	"FUNCTION",
 	"END_FUNCTION",
 	"EQUALS",
+	"EQUAL_TO",
 	"PLUS_EQUALS",
 	"MINUS_EQUALS",
 	"DIVIDE_EQUALS",
@@ -58,6 +62,7 @@ std::vector<std::string> tokenTypes = {
 	"MULTIPLY",
 	"DIVIDE",
 	"DEFINE",
+	"COMMA",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -71,18 +76,20 @@ bool Lexer::isInteger(std::string num)
 
 void Lexer::tokenize(std::string token)
 {
-	codeFile.token.push_back(token);
-	for (size_t i = 0; i < tokenNames.size(); ++i) {
-		if (tokenNames.at(i) == token) {
-			codeFile.type.push_back(tokenTypes.at(i));
+	if (token != "" && token != " ") {
+		codeFile.token.push_back(token);
+		for (size_t i = 0; i < tokenNames.size(); ++i) {
+			if (tokenNames.at(i) == token) {
+				codeFile.type.push_back(tokenTypes.at(i));
+				return;
+			}
+		}
+		if (isInteger(token)) {
+			codeFile.type.push_back("CONSTANT_VALUE");
 			return;
 		}
+		codeFile.type.push_back("NAME");
 	}
-	if (isInteger(token)) {
-		codeFile.type.push_back("CONSTANT_VALUE");
-		return;
-	}
-	codeFile.type.push_back("NAME");
 }
 
 void Lexer::retokenize(std::string token, size_t pos)
@@ -105,6 +112,53 @@ bool Lexer::isWhitespace(char chr)
 	return chr == char(32) or chr == char(13);
 }
 
+bool Lexer::special1Character(char character)
+{
+	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',';
+}
+
+bool Lexer::special2Character(char character, char character2)
+{
+	switch (character) {
+	case '=':
+		switch (character2) {
+		case '=':
+			return true;
+		}
+	case '!':
+		switch (character2) {
+		case '=':
+			return true;
+		}
+	case '>':
+		switch (character2) {
+		case '=':
+			return true;
+		}
+	case '<':
+		switch (character2) {
+		case '=':
+			return true;
+		}
+	}
+	return false;
+}
+
+void Lexer::removeBlankspace()
+{
+	size_t pos = 0;
+	for (auto i = codeFile.token.begin(); i != codeFile.token.end(); ++i, ++pos) {
+		if (codeFile.token.at(pos) == "" or codeFile.token.at(pos) == " ") {
+			codeFile.token.erase(i);
+			codeFile.type.erase(i);
+		}
+	}
+	for (size_t i = 0; i < codeFile.token.size(); ++i) {
+		if (codeFile.token.at(i) == "" or codeFile.token.at(i) == " ")
+			removeBlankspace();
+	}
+}
+
 void Lexer::readCode(std::ifstream fileName)
 {
 	std::string line;
@@ -114,6 +168,19 @@ void Lexer::readCode(std::ifstream fileName)
 		for (size_t i = 0; i < line.length(); ++i) {
 			if (line.at(i) == '	') {
 				++tabNum;
+				continue;
+			}
+			/*if (special2Character(line.at(i), line.at(i + 1))) {
+				tokenize(lineContent);
+				lineContent.clear();
+				tokenize(std::string(1, line.at(i)) += std::string(1, line.at(i + 1)));
+				++i;
+				continue;
+			}*/
+			if (special1Character(line.at(i))) {
+				tokenize(lineContent);
+				lineContent.clear();
+				tokenize(std::string(1, line.at(i)));
 				continue;
 			}
 			if (line.at(i) == '"') {
@@ -142,4 +209,5 @@ void Lexer::readCode(std::ifstream fileName)
 		}
 	}
 	fileName.close();
+	//removeBlankspace();
 }
