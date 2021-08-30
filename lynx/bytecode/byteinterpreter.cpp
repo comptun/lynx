@@ -148,6 +148,8 @@ void ByteInterpreter::interpret()
 				if (stack.at(stack.size() - 2) < stack.back())
 					conditional = true;
 			}
+			stack.pop_back();
+			stack.pop_back();
 			break;
 		case JUMP_IF_FALSE:
 			if (conditional == false)
@@ -251,6 +253,15 @@ void ByteInterpreter::interpret()
 		case STORE_PARAM_NAME:
 			names.identifier.push_back(file.at(instruction + 1));
 			names.reference.push_back(stack.size() - 1);
+			break;
+		case DELETE:
+			stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))) = 0;
+			names.reference.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
+			names.identifier.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
+			break;
+		case POP_NAME:
+			names.reference.pop_back();
+			names.identifier.pop_back();
 			break;
 		}
 	}

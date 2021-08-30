@@ -27,6 +27,8 @@ enum opcodeIndex {
 	LOAD_PARAM_CONST,
 	LOAD_PARAM_NAME,
 	STORE_PARAM_NAME,
+	DELETE,
+	POP_NAME,
 
 	ERROR = 404,
 };

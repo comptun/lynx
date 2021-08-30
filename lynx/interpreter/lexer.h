@@ -37,6 +37,7 @@ enum tokenEnum {
 	DIVIDE,
 	DEFINE,
 	COMMA,
+	PERIOD,
 };
 
 class Lexer {

@@ -15,7 +15,11 @@ enum statement {
 
 class Interpreter : public Lexer, public Preprocessor {
 public:
+	bool isInFunctionDefinition = false;
+	bool isInFunctionCall = false;
 	std::string currentName;
+	std::string functionName;
+	std::vector<int> nameScope;
 	std::vector<std::string> knownNames;
 	std::vector<std::vector<size_t>> jumpInstruction;
 	std::vector<int> statementType;

@@ -43,12 +43,22 @@ void Interpreter::preprocess()
 void Interpreter::translate()
 {
 	preprocess();
+	nameScope.push_back(0);
 	file.push_back("LOAD_CONST");
 	file.push_back("0");
 	file.push_back("STORE_NAME");
 	file.push_back("LYNX_START");
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
+		case RBRACKET:
+			if (isInFunctionCall) {
+				file.push_back("CALL");
+				file.push_back(functionName);
+			}
+			isInFunctionCall = false;
+			isInFunctionDefinition = false;
+			++instruction;
+			break;
 		case DEFINE:
 			instruction += 3;
 			break;
@@ -91,6 +101,7 @@ void Interpreter::translate()
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(IF_STATEMENT);
+			nameScope.push_back(0);
 			break;
 		}
 		case WHILE_LOOP: {
@@ -132,6 +143,7 @@ void Interpreter::translate()
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(WHILE_STATEMENT);
+			nameScope.push_back(0);
 			break;
 		}
 		case AND:
@@ -281,6 +293,35 @@ void Interpreter::translate()
 			instruction += 2;
 			break;
 		case NAME:
+			/*for (size_t i = instruction + 1; i < codeFile.token.size(); ++i) {
+				if (codeFile.token.at(i + 1) == "(")
+					break;
+				if (codeFile.token.at(i) == ")" && codeFile.token.at(i + 1) == "{") {
+					isInFunctionDefinition = true;
+					break;
+				}
+				if (codeFile.token.at(i) == ")" && codeFile.token.at(i + 1) != "{") {
+					isInFunctionCall = true;
+					break;
+				}
+			}
+			if (isInFunctionDefinition) {
+				file.push_back("START_FUNCTION");
+				file.push_back(codeFile.token.at(instruction));
+				statementType.push_back(FUNCTION_STATEMENT);
+				if (codeFile.token.at(instruction + 2) == ")") {
+					instruction += 4;
+					isInFunctionCall = false;
+					isInFunctionDefinition = false;
+				}
+				else {
+					instruction += 2;
+				}
+			}
+			if (isInFunctionCall) {
+				functionName = codeFile.token.at(instruction);
+				instruction += 2;
+			}*/
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case LEFT_CURLY_BRACE:
 				file.push_back("START_FUNCTION");
@@ -292,9 +333,11 @@ void Interpreter::translate()
 					break;
 				}
 				statementType.push_back(FUNCTION_STATEMENT);
+				nameScope.push_back(0);
 				instruction += 2;
 				break;
 			case EQUALS:
+				nameScope.back() += 1;
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
 					file.push_back("LOAD_CONST");
@@ -306,7 +349,8 @@ void Interpreter::translate()
 					break;
 				}
 				if (codeFile.token.at(instruction + 3) != "+" and codeFile.token.at(instruction + 3) != "-" and codeFile.token.at(instruction + 3) != "*" and codeFile.token.at(instruction + 3) != "/") {
-					knownNames.push_back(codeFile.token.at(instruction));
+					if (nameExists(codeFile.token.at(instruction)) == false)
+						knownNames.push_back(codeFile.token.at(instruction));
 					file.push_back("STORE_NAME");
 					file.push_back(codeFile.token.at(instruction));
 				}
@@ -315,8 +359,16 @@ void Interpreter::translate()
 					file.push_back("STORE_NAME");
 					file.push_back("_VAR_TEMP_STORAGE");
 					if (nameExists(codeFile.token.at(instruction)) == false) {
-						file.push_back("LOAD_CONST");
-						file.push_back("0");
+						switch (getToken(codeFile.type.at(instruction + 2))) {
+						case CONSTANT_VALUE:
+							file.push_back("LOAD_CONST");
+							file.push_back(codeFile.token.at(instruction + 2));
+							break;
+						case NAME:
+							file.push_back("LOAD_NAME");
+							file.push_back(codeFile.token.at(instruction + 2));
+							break;
+						}
 						file.push_back("STORE_NAME");
 						file.push_back(codeFile.token.at(instruction));
 					}
@@ -377,6 +429,11 @@ void Interpreter::translate()
 			++instruction;
 			break;
 		case RIGHT_CURLY_BRACE:
+			for (size_t e = 0; e < nameScope.back(); ++e) {
+				file.push_back("POP_NAME");
+				file.push_back("0");
+			}
+			nameScope.pop_back();
 			switch (statementType.back()) {
 			case IF_STATEMENT:
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {

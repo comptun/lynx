@@ -31,6 +31,7 @@ std::vector<std::string> tokenNames = {
 	"/",
 	"define",
 	",",
+	".",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -63,6 +64,7 @@ std::vector<std::string> tokenTypes = {
 	"DIVIDE",
 	"DEFINE",
 	"COMMA",
+	"PERIOD",
 };
 
 bool Lexer::isInteger(std::string num)
