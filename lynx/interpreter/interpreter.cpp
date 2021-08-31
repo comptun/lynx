@@ -42,6 +42,13 @@ void Interpreter::preprocess()
 
 void Interpreter::translate()
 {
+	tokenize("LYNX_END");
+	tokenize("=");
+	tokenize("0");
+	tokenize("LYNX_END");
+	tokenize("+=");
+	tokenize("1");
+
 	preprocess();
 	nameScope.push_back(0);
 	file.push_back("LOAD_CONST");
@@ -50,6 +57,61 @@ void Interpreter::translate()
 	file.push_back("LYNX_START");
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
+		case ELSE:
+			if (codeFile.token.at(instruction + 1) == "if") {
+				++instruction;
+				switch (getToken(codeFile.type.at(instruction + 1))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				}
+				if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
+					switch (getToken(codeFile.type.at(instruction + 3))) {
+					case NAME:
+						file.push_back("LOAD_NAME");
+						file.push_back(codeFile.token.at(instruction + 3));
+						break;
+					case CONSTANT_VALUE:
+						file.push_back("LOAD_CONST");
+						file.push_back(codeFile.token.at(instruction + 3));
+						break;
+					}
+					file.push_back("COMPARE");
+					file.push_back(codeFile.token.at(instruction + 2));
+					instruction += 4;
+				}
+				else {
+					file.push_back("LOAD_CONST");
+					file.push_back("1");
+					file.push_back("COMPARE");
+					file.push_back(">=");
+					instruction += 2;
+				}
+				file.push_back("JUMP_IF_FALSE");
+				file.push_back("0");
+				std::vector<size_t> vec;
+				jumpInstruction.push_back(vec);
+				jumpInstruction.back().push_back(file.size() - 1);
+				statementType.push_back(ELIF_STATEMENT);
+				nameScope.push_back(0);
+				break;
+			}
+			else {
+				statementType.push_back(ELSE_STATEMENT);
+				nameScope.push_back(0);
+				++instruction;
+			}
+			break;
+		case JUMP_TO:
+			file.push_back("JUMP");
+			file.push_back(codeFile.token.at(instruction + 1));
+			instruction += 2;
+			break;
 		case RBRACKET:
 			if (isInFunctionCall) {
 				file.push_back("CALL");
@@ -323,6 +385,12 @@ void Interpreter::translate()
 				instruction += 2;
 			}*/
 			switch (getToken(codeFile.type.at(instruction + 1))) {
+			case COLON:
+				file.push_back("LOAD_CONST");
+				file.push_back(std::to_string(file.size() - 2));
+				file.push_back("STORE_NAME");
+				file.push_back(codeFile.token.at(instruction));
+				break;
 			case LEFT_CURLY_BRACE:
 				file.push_back("START_FUNCTION");
 				file.push_back(codeFile.token.at(instruction));
@@ -435,7 +503,31 @@ void Interpreter::translate()
 			}
 			nameScope.pop_back();
 			switch (statementType.back()) {
+			case ELIF_STATEMENT:
+				if (codeFile.token.at(instruction + 1) == "else") {
+					file.push_back("JUMP");
+					file.push_back("0");
+					elseJump.push_back(file.size() - 1);
+				}
+				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
+					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
+				}
+				jumpInstruction.pop_back();
+				file.at(elseJump.back()) = std::to_string(file.size() - 2);
+				elseJump.pop_back();
+				instruction += 1;
+				break;
+			case ELSE_STATEMENT:
+				file.at(elseJump.back()) = std::to_string(file.size() - 2);
+				elseJump.pop_back();
+				instruction += 1;
+				break;
 			case IF_STATEMENT:
+				if (codeFile.token.at(instruction + 1) == "else") {
+					file.push_back("JUMP");
+					file.push_back("0");
+					elseJump.push_back(file.size() - 1);
+				}
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
 					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
 				}

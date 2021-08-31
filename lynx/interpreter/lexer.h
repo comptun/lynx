@@ -38,6 +38,8 @@ enum tokenEnum {
 	DEFINE,
 	COMMA,
 	PERIOD,
+	JUMP_TO,
+	ELSE,
 };
 
 class Lexer {

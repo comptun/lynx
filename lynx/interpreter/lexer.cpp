@@ -32,6 +32,8 @@ std::vector<std::string> tokenNames = {
 	"define",
 	",",
 	".",
+	"jump",
+	"else",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -65,6 +67,8 @@ std::vector<std::string> tokenTypes = {
 	"DEFINE",
 	"COMMA",
 	"PERIOD",
+	"JUMP",
+	"ELSE",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -116,7 +120,7 @@ bool Lexer::isWhitespace(char chr)
 
 bool Lexer::special1Character(char character)
 {
-	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',';
+	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',' or character == ':';
 }
 
 bool Lexer::special2Character(char character, char character2)

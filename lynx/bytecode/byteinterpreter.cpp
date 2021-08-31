@@ -160,7 +160,10 @@ void ByteInterpreter::interpret()
 				instruction = std::stoi(file.at(instruction + 1));
 			break;
 		case JUMP:
-			instruction = std::stoi(file.at(instruction + 1));
+			if (isInteger(file.at(instruction + 1)))
+				instruction = std::stoi(file.at(instruction + 1));
+			else
+				instruction = stack.at(names.reference.at(getNameReference(file.at(instruction + 1))));
 			break;
 		case CALL:
 			if (doesNameExist(file.at(instruction + 1)) == false) {

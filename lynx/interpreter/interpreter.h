@@ -11,6 +11,8 @@ enum statement {
 	IF_STATEMENT,
 	WHILE_STATEMENT,
 	FUNCTION_STATEMENT,
+	ELSE_STATEMENT,
+	ELIF_STATEMENT,
 };
 
 class Interpreter : public Lexer, public Preprocessor {
@@ -21,6 +23,7 @@ public:
 	std::string functionName;
 	std::vector<int> nameScope;
 	std::vector<std::string> knownNames;
+	std::vector<size_t> elseJump;
 	std::vector<std::vector<size_t>> jumpInstruction;
 	std::vector<int> statementType;
 	std::vector<size_t> breakJump;
