@@ -34,6 +34,8 @@ std::vector<std::string> tokenNames = {
 	".",
 	"jump",
 	"else",
+	"switch",
+	"case",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -69,6 +71,8 @@ std::vector<std::string> tokenTypes = {
 	"PERIOD",
 	"JUMP",
 	"ELSE",
+	"SWITCH",
+	"CASE",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -172,6 +176,9 @@ void Lexer::readCode(std::ifstream fileName)
 	while (getline(fileName, line)) {
 		int tabNum = 0;
 		for (size_t i = 0; i < line.length(); ++i) {
+			if (line.at(i) == '/' and line.at(i + 1) == '/') {
+				break;
+			}
 			if (line.at(i) == '	') {
 				++tabNum;
 				continue;

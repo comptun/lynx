@@ -30,6 +30,7 @@ std::vector<std::string> opcodes = {
 	"STORE_PARAM_NAME",
 	"DELETE",
 	"POP_NAME",
+	"SWITCH_STATEMENT",
 };
 
 unsigned int ByteInterpreter::getOpcode(std::string code)

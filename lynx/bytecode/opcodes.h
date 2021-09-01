@@ -29,6 +29,7 @@ enum opcodeIndex {
 	STORE_PARAM_NAME,
 	DELETE,
 	POP_NAME,
+	_SWITCH_STATEMENT,
 
 	ERROR = 404,
 };

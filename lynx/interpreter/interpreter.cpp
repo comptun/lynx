@@ -1,6 +1,8 @@
 #include "interpreter.h"
 #include "../bytecode/byteinterpreter.h"
 
+SwitchData switchData;
+
 int Interpreter::getToken(std::string str)
 {
 	for (size_t i = 0; i < tokenTypes.size(); ++i) {
@@ -40,6 +42,12 @@ void Interpreter::preprocess()
 	}
 }
 
+void Interpreter::bytecode(std::string instruction, std::string param)
+{
+	file.push_back(instruction);
+	file.push_back(param);
+}
+
 void Interpreter::translate()
 {
 	tokenize("LYNX_END");
@@ -57,6 +65,22 @@ void Interpreter::translate()
 	file.push_back("LYNX_START");
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
+		case SWITCH: {
+			statementType.push_back(SWITCH_STATEMENT);
+			switchData.names.push_back(codeFile.token.size() - 1);
+			std::vector<std::string> vals;
+			switchData.values.push_back(vals);
+			std::vector<size_t> positions;
+			switchData.position.push_back(positions);
+			bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
+			break;
+		}
+		case CASE:
+			if (codeFile.token.at(instruction + 2) == ":") {
+				switchData.position.back().push_back(file.size() - 1);
+				switchData.values.back().push_back(codeFile.token.at(instruction + 1));
+			}
+			break;
 		case ELSE:
 			if (codeFile.token.at(instruction + 1) == "if") {
 				++instruction;
@@ -504,6 +528,8 @@ void Interpreter::translate()
 			nameScope.pop_back();
 			switch (statementType.back()) {
 			case ELIF_STATEMENT:
+				file.at(elseJump.back()) = std::to_string(file.size() - 2);
+				elseJump.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
 					file.push_back("JUMP");
 					file.push_back("0");
@@ -513,8 +539,6 @@ void Interpreter::translate()
 					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
 				}
 				jumpInstruction.pop_back();
-				file.at(elseJump.back()) = std::to_string(file.size() - 2);
-				elseJump.pop_back();
 				instruction += 1;
 				break;
 			case ELSE_STATEMENT:

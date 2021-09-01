@@ -40,6 +40,8 @@ enum tokenEnum {
 	PERIOD,
 	JUMP_TO,
 	ELSE,
+	SWITCH,
+	CASE,
 };
 
 class Lexer {

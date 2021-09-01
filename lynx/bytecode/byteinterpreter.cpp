@@ -266,6 +266,9 @@ void ByteInterpreter::interpret()
 			names.reference.pop_back();
 			names.identifier.pop_back();
 			break;
+		case SWITCH:
+
+			break;
 		}
 	}
 }
