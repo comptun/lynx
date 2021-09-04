@@ -1,8 +1,6 @@
 #include "interpreter.h"
 #include "../bytecode/byteinterpreter.h"
 
-SwitchData switchData;
-
 int Interpreter::getToken(std::string str)
 {
 	for (size_t i = 0; i < tokenTypes.size(); ++i) {
@@ -65,22 +63,6 @@ void Interpreter::translate()
 	file.push_back("LYNX_START");
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
-		case SWITCH: {
-			statementType.push_back(SWITCH_STATEMENT);
-			switchData.names.push_back(codeFile.token.size() - 1);
-			std::vector<std::string> vals;
-			switchData.values.push_back(vals);
-			std::vector<size_t> positions;
-			switchData.position.push_back(positions);
-			bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-			break;
-		}
-		case CASE:
-			if (codeFile.token.at(instruction + 2) == ":") {
-				switchData.position.back().push_back(file.size() - 1);
-				switchData.values.back().push_back(codeFile.token.at(instruction + 1));
-			}
-			break;
 		case ELSE:
 			if (codeFile.token.at(instruction + 1) == "if") {
 				++instruction;
@@ -191,6 +173,7 @@ void Interpreter::translate()
 			break;
 		}
 		case WHILE_LOOP: {
+			continueJump.push_back(file.size() - 2);
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				file.push_back("LOAD_NAME");
@@ -270,16 +253,13 @@ void Interpreter::translate()
 			jumpInstruction.back().push_back(file.size() - 1);
 			break;
 		case FUNCTION:
-			file.push_back("START_FUNCTION");
-			file.push_back(codeFile.token.at(instruction + 1));
-			if (codeFile.token.at(instruction + 2) == ":") {
-				file.push_back("STORE_NAME");
-				file.push_back(codeFile.token.at(instruction + 3));
-				instruction += 4;
-				break;
+			isInFunctionDefinition = true;
+			if (codeFile.token.at(instruction + 2) == "(") {
+				file.push_back("START_FUNCTION");
+				file.push_back(codeFile.token.at(instruction + 1));
+				statementType.push_back(FUNCTION_STATEMENT);
+				instruction += 3;
 			}
-			statementType.push_back(FUNCTION_STATEMENT);
-			instruction += 2;
 			break;
 		case FUNCTION_END:
 			file.push_back("END_FUNCTION");
@@ -378,36 +358,65 @@ void Interpreter::translate()
 			}
 			instruction += 2;
 			break;
-		case NAME:
-			/*for (size_t i = instruction + 1; i < codeFile.token.size(); ++i) {
-				if (codeFile.token.at(i + 1) == "(")
-					break;
-				if (codeFile.token.at(i) == ")" && codeFile.token.at(i + 1) == "{") {
-					isInFunctionDefinition = true;
-					break;
-				}
-				if (codeFile.token.at(i) == ")" && codeFile.token.at(i + 1) != "{") {
-					isInFunctionCall = true;
-					break;
-				}
-			}
-			if (isInFunctionDefinition) {
-				file.push_back("START_FUNCTION");
-				file.push_back(codeFile.token.at(instruction));
-				statementType.push_back(FUNCTION_STATEMENT);
-				if (codeFile.token.at(instruction + 2) == ")") {
-					instruction += 4;
-					isInFunctionCall = false;
-					isInFunctionDefinition = false;
-				}
-				else {
-					instruction += 2;
-				}
-			}
-			if (isInFunctionCall) {
-				functionName = codeFile.token.at(instruction);
+		case CONSTANT_VALUE:
+			if (codeFile.token.at(instruction + 1) == "," and isInFunctionCall) {
+				bytecode("LOAD_CONST", codeFile.token.at(instruction));
+				bytecode("STORE_PARAM", "0");
 				instruction += 2;
-			}*/
+				break;
+			}
+			if (codeFile.token.at(instruction + 1) == ")" and isInFunctionCall) {
+				bytecode("LOAD_CONST", codeFile.token.at(instruction));
+				bytecode("STORE_PARAM", "0");
+				instruction += 1;
+				break;
+			}
+
+			if (codeFile.token.at(instruction + 1) == "," and isInFunctionDefinition) {
+				bytecode("LOAD_PARAM", "0");
+				bytecode("STORE_NAME", codeFile.token.at(instruction));
+				instruction += 2;
+				break;
+			}
+			if (codeFile.token.at(instruction + 1) == ")" and isInFunctionDefinition) {
+				bytecode("LOAD_PARAM", "0");
+				bytecode("STORE_NAME", codeFile.token.at(instruction));
+				instruction += 1;
+				break;
+			}
+			break;
+		case NAME:
+			if (codeFile.token.at(instruction + 1) == "(") {
+				functionName = codeFile.token.at(instruction);
+				isInFunctionCall = true;
+				instruction += 2;
+				break;
+			}
+			if (codeFile.token.at(instruction + 1) == "," and isInFunctionCall) {
+				bytecode("LOAD_NAME", codeFile.token.at(instruction));
+				bytecode("STORE_PARAM", "0");
+				instruction += 2;
+				break;
+			}
+			if (codeFile.token.at(instruction + 1) == ")" and isInFunctionCall) {
+				bytecode("LOAD_NAME", codeFile.token.at(instruction));
+				bytecode("STORE_PARAM", "0");
+				instruction += 1;
+				break;
+			}
+
+			if (codeFile.token.at(instruction + 1) == "," and isInFunctionDefinition) {
+				bytecode("LOAD_PARAM", "0");
+				bytecode("STORE_NAME", codeFile.token.at(instruction));
+				instruction += 2;
+				break;
+			}
+			if (codeFile.token.at(instruction + 1) == ")" and isInFunctionDefinition) {
+				bytecode("LOAD_PARAM", "0");
+				bytecode("STORE_NAME", codeFile.token.at(instruction));
+				instruction += 1;
+				break;
+			}
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case COLON:
 				file.push_back("LOAD_CONST");
@@ -565,6 +574,7 @@ void Interpreter::translate()
 				for (size_t a = 0; a < breakJump.size(); ++a) {
 					file.at(breakJump.at(a)) = std::to_string(file.size());
 				}
+				continueJump.pop_back();
 				breakJump.clear();
 				file.push_back("JUMP");
 				file.push_back(std::to_string(jumpInstruction.back().front() - 9));
@@ -603,6 +613,10 @@ void Interpreter::translate()
 			file.push_back("JUMP");
 			file.push_back("0");
 			breakJump.push_back(file.size() - 1);
+			++instruction;
+			break;
+		case CONTINUE:
+			bytecode("JUMP", std::to_string(continueJump.back()));
 			++instruction;
 			break;
 		}

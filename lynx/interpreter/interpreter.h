@@ -16,15 +16,6 @@ enum statement {
 	SWITCH_STATEMENT,
 };
 
-class SwitchData {
-public:
-	std::vector<std::vector<size_t>> position;
-	std::vector<std::vector<std::string>> values;
-	std::vector<size_t> names;
-};
-
-extern SwitchData switchData;
-
 class Interpreter : public Lexer, public Preprocessor {
 public:
 	bool isInFunctionDefinition = false;
@@ -37,6 +28,7 @@ public:
 	std::vector<std::vector<size_t>> jumpInstruction;
 	std::vector<int> statementType;
 	std::vector<size_t> breakJump;
+	std::vector<size_t> continueJump;
 	void bytecode(std::string instruction, std::string param);
 	void preprocess();
 	bool nameExists(std::string name);

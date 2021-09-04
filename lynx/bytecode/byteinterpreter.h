@@ -21,7 +21,6 @@ public:
 
 	unsigned int getOpcode(std::string code);
 	size_t getNameReference(std::string name);
-	size_t getParamNameReference(std::string name);
 
 	struct Names {
 		std::vector<std::string> identifier;
@@ -29,12 +28,11 @@ public:
 	};
 
 	Names names;
-	Names paramNames;
-
+	
 	//std::vector<std::variant<int, double, std::string>> stack;
 	std::vector<int> stack;
-	std::vector<int> paramStack;
 	std::vector<std::vector<int>> arrayStack;
+	std::vector<int> paramStack;
 
 	void executePCF(std::string funcName);
 
