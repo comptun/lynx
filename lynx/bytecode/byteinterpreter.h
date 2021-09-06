@@ -33,6 +33,7 @@ public:
 	std::vector<int> stack;
 	std::vector<std::vector<int>> arrayStack;
 	std::vector<int> paramStack;
+	std::vector<std::vector<int>> vargParamStack;
 
 	void executePCF(std::string funcName);
 

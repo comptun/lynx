@@ -245,6 +245,13 @@ void ByteInterpreter::interpret()
 		case STORE_PARAM:
 			paramStack.push_back(stack.back());
 			break;
+		case LOAD_VAR_PARAM:
+			stack.push_back(vargParamStack.back().at(0));
+			vargParamStack.back().erase(vargParamStack.back().begin());
+			break;
+		case STORE_VAR_PARAM:
+
+			break;
 		case DELETE:
 			stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))) = 0;
 			names.reference.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));

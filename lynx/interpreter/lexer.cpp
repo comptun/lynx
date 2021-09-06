@@ -37,6 +37,7 @@ std::vector<std::string> tokenNames = {
 	"else",
 	"switch",
 	"case",
+	"STRING",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -75,6 +76,7 @@ std::vector<std::string> tokenTypes = {
 	"ELSE",
 	"SWITCH",
 	"CASE",
+	"STRING",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -95,6 +97,13 @@ void Lexer::tokenize(std::string token)
 				codeFile.type.push_back(tokenTypes.at(i));
 				return;
 			}
+		}
+		if (token.at(0) == '"') {
+			size_t offset = codeFile.token.back().size() - 2;
+			codeFile.token.back().erase(codeFile.token.back().begin());
+			codeFile.token.back().erase(offset);
+			codeFile.type.push_back("STRING");
+			return;
 		}
 		if (isInteger(token)) {
 			codeFile.type.push_back("CONSTANT_VALUE");
@@ -173,52 +182,52 @@ void Lexer::removeBlankspace()
 
 void Lexer::readCode(std::ifstream fileName)
 {
+	bool isInString = false;
 	std::string line;
 	std::string lineContent;
 	while (getline(fileName, line)) {
 		int tabNum = 0;
 		for (size_t i = 0; i < line.length(); ++i) {
-			if (line.at(i) == '/' and line.at(i + 1) == '/') {
-				break;
-			}
-			if (line.at(i) == '	') {
-				++tabNum;
-				continue;
-			}
-			/*if (special2Character(line.at(i), line.at(i + 1))) {
-				tokenize(lineContent);
-				lineContent.clear();
-				tokenize(std::string(1, line.at(i)) += std::string(1, line.at(i + 1)));
-				++i;
-				continue;
-			}*/
-			if (special1Character(line.at(i))) {
-				tokenize(lineContent);
-				lineContent.clear();
-				tokenize(std::string(1, line.at(i)));
-				continue;
-			}
 			if (line.at(i) == '"') {
-				for (++i; line.at(i) != '"'; ++i) {
+				if (isInString)
+					isInString = false;
+				else
+					isInString = true;
+			}
+			if (!isInString) {
+				if (line.at(i) == '/' and line.at(i + 1) == '/') {
+					break;
+				}
+				if (line.at(i) == '	') {
+					++tabNum;
+					continue;
+				}
+				/*if (special2Character(line.at(i), line.at(i + 1))) {
+					tokenize(lineContent);
+					lineContent.clear();
+					tokenize(std::string(1, line.at(i)) += std::string(1, line.at(i + 1)));
+					++i;
+					continue;
+				}*/
+				if (special1Character(line.at(i))) {
+					tokenize(lineContent);
+					lineContent.clear();
+					tokenize(std::string(1, line.at(i)));
+					continue;
+				}
+				if (i == line.length() - 1) {
 					lineContent += line.at(i);
 					codeFile.indents.push_back(tabNum);
 					tokenize(lineContent);
 					lineContent.clear();
+					continue;
 				}
-				break;
-			}
-			if (i == line.length() - 1) {
-				lineContent += line.at(i);
-				codeFile.indents.push_back(tabNum);
-				tokenize(lineContent);
-				lineContent.clear();
-				continue;
-			}
-			if (isWhitespace(line.at(i))) {
-				codeFile.indents.push_back(tabNum);
-				tokenize(lineContent);
-				lineContent.clear();
-				continue;
+				if (isWhitespace(line.at(i))) {
+					codeFile.indents.push_back(tabNum);
+					tokenize(lineContent);
+					lineContent.clear();
+					continue;
+				}
 			}
 			lineContent += line.at(i);
 		}
