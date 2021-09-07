@@ -31,6 +31,7 @@ enum opcodeIndex {
 	_SWITCH_STATEMENT,
 	LOAD_VAR_PARAM,
 	STORE_VAR_PARAM,
+	LOAD_BACK_REF,
 
 	ERROR = 404,
 };

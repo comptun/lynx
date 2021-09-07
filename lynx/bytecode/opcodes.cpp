@@ -30,6 +30,9 @@ std::vector<std::string> opcodes = {
 	"DELETE",
 	"POP_NAME",
 	"SWITCH_STATEMENT",
+	"LOAD_VAR_PARAM",
+	"STORE_VAR_PARAM",
+	"LOAD_BACK_REF",
 };
 
 unsigned int ByteInterpreter::getOpcode(std::string code)

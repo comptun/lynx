@@ -61,6 +61,7 @@ void Interpreter::translate()
 	file.push_back("0");
 	file.push_back("STORE_NAME");
 	file.push_back("LYNX_START");
+
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {
 		case ELSE:
@@ -131,6 +132,8 @@ void Interpreter::translate()
 			instruction += 3;
 			break;
 		case IF: {
+			isInConditional = true;
+			conditionalStage = 0;
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				file.push_back("LOAD_NAME");
@@ -170,6 +173,45 @@ void Interpreter::translate()
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(IF_STATEMENT);
 			nameScope.push_back(0);
+			/*switch (getToken(codeFile.type.at(instruction + 1))) {
+			case NAME:
+				file.push_back("LOAD_NAME");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			case CONSTANT_VALUE:
+				file.push_back("LOAD_CONST");
+				file.push_back(codeFile.token.at(instruction + 1));
+				break;
+			}
+			if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
+				switch (getToken(codeFile.type.at(instruction + 3))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 3));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 3));
+					break;
+				}
+				file.push_back("COMPARE");
+				file.push_back(codeFile.token.at(instruction + 2));
+				instruction += 4;
+			}
+			else {
+				file.push_back("LOAD_CONST");
+				file.push_back("1");
+				file.push_back("COMPARE");
+				file.push_back(">=");
+				instruction += 2;
+			}
+			file.push_back("JUMP_IF_FALSE");
+			file.push_back("0");
+			std::vector<size_t> vec;
+			jumpInstruction.push_back(vec);
+			jumpInstruction.back().push_back(file.size() - 1);
+			statementType.push_back(IF_STATEMENT);
+			nameScope.push_back(0);*/
 			break;
 		}
 		case WHILE_LOOP: {
@@ -267,96 +309,96 @@ void Interpreter::translate()
 			++instruction;
 			break;
 		case PLUS:
-			file.push_back("LOAD_REF");
-			file.push_back("_VAR_TEMP_STORAGE");
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
+			if (isInNameAssignment) {
+				switch (getToken(codeFile.type.at(instruction + 1))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				}
+				file.push_back("ADD");
+				file.push_back("0");
+				bytecode("POP_BACK", "0");
+				if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+					bytecode("POP_BACK", "0");
+					bytecode("STORE_NAME", currentName);
+					isInNameAssignment = false;
+				}
+				instruction += 2;
 			}
-			file.push_back("ADD");
-			file.push_back("0");
-			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
-				file.push_back("LOAD_NAME");
-				file.push_back("_VAR_TEMP_STORAGE");
-				file.push_back("STORE_NAME");
-				file.push_back(currentName);
-			}
-			instruction += 2;
 			break;
 		case MINUS:
-			file.push_back("LOAD_REF");
-			file.push_back("_VAR_TEMP_STORAGE");
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
+			if (isInNameAssignment) {
+				switch (getToken(codeFile.type.at(instruction + 1))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				}
+				file.push_back("SUB");
+				file.push_back("0");
+				bytecode("POP_BACK", "0");
+				if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+					bytecode("POP_BACK", "0");
+					bytecode("STORE_NAME", currentName);
+					isInNameAssignment = false;
+				}
+				instruction += 2;
 			}
-			file.push_back("SUB");
-			file.push_back("0");
-			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
-				file.push_back("LOAD_NAME");
-				file.push_back("_VAR_TEMP_STORAGE");
-				file.push_back("STORE_NAME");
-				file.push_back(currentName);
-			}
-			instruction += 2;
 			break;
 		case MULTIPLY:
-			file.push_back("LOAD_REF");
-			file.push_back("_VAR_TEMP_STORAGE");
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
+			if (isInNameAssignment) {
+				switch (getToken(codeFile.type.at(instruction + 1))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				}
+				file.push_back("MUL");
+				file.push_back("0");
+				bytecode("POP_BACK", "0");
+				if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+					bytecode("POP_BACK", "0");
+					bytecode("STORE_NAME", currentName);
+					isInNameAssignment = false;
+				}
+				instruction += 2;
 			}
-			file.push_back("MUL");
-			file.push_back("0");
-			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
-				file.push_back("LOAD_NAME");
-				file.push_back("_VAR_TEMP_STORAGE");
-				file.push_back("STORE_NAME");
-				file.push_back(currentName);
-			}
-			instruction += 2;
 			break;
 		case DIVIDE:
-			file.push_back("LOAD_REF");
-			file.push_back("_VAR_TEMP_STORAGE");
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
-				break;
+			if (isInNameAssignment) {
+				switch (getToken(codeFile.type.at(instruction + 1))) {
+				case NAME:
+					file.push_back("LOAD_NAME");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				case CONSTANT_VALUE:
+					file.push_back("LOAD_CONST");
+					file.push_back(codeFile.token.at(instruction + 1));
+					break;
+				}
+				file.push_back("DIV");
+				file.push_back("0");
+				bytecode("POP_BACK", "0");
+				if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
+					bytecode("POP_BACK", "0");
+					bytecode("STORE_NAME", currentName);
+					isInNameAssignment = false;
+				}
+				instruction += 2;
 			}
-			file.push_back("DIV");
-			file.push_back("0");
-			if (codeFile.token.at(instruction + 2) != "+" and codeFile.token.at(instruction + 2) != "-" and codeFile.token.at(instruction + 2) != "*" and codeFile.token.at(instruction + 2) != "/") {
-				file.push_back("LOAD_NAME");
-				file.push_back("_VAR_TEMP_STORAGE");
-				file.push_back("STORE_NAME");
-				file.push_back(currentName);
-			}
-			instruction += 2;
 			break;
 		case CONSTANT_VALUE:
 			if (codeFile.token.at(instruction + 1) == "," and isInFunctionCall) {
@@ -438,7 +480,6 @@ void Interpreter::translate()
 				instruction += 2;
 				break;
 			case EQUALS:
-				nameScope.back() += 1;
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
 					file.push_back("LOAD_CONST");
@@ -449,6 +490,8 @@ void Interpreter::translate()
 					file.push_back(codeFile.token.at(instruction + 2));
 					break;
 				}
+				if (nameExists(codeFile.token.at(instruction)) == false)
+						nameScope.back() += 1;
 				if (codeFile.token.at(instruction + 3) != "+" and codeFile.token.at(instruction + 3) != "-" and codeFile.token.at(instruction + 3) != "*" and codeFile.token.at(instruction + 3) != "/") {
 					if (nameExists(codeFile.token.at(instruction)) == false)
 						knownNames.push_back(codeFile.token.at(instruction));
@@ -457,22 +500,8 @@ void Interpreter::translate()
 				}
 				else {
 					currentName = codeFile.token.at(instruction);
-					file.push_back("STORE_NAME");
-					file.push_back("_VAR_TEMP_STORAGE");
-					if (nameExists(codeFile.token.at(instruction)) == false) {
-						switch (getToken(codeFile.type.at(instruction + 2))) {
-						case CONSTANT_VALUE:
-							file.push_back("LOAD_CONST");
-							file.push_back(codeFile.token.at(instruction + 2));
-							break;
-						case NAME:
-							file.push_back("LOAD_NAME");
-							file.push_back(codeFile.token.at(instruction + 2));
-							break;
-						}
-						file.push_back("STORE_NAME");
-						file.push_back(codeFile.token.at(instruction));
-					}
+					bytecode("LOAD_BACK_REF", "0");
+					isInNameAssignment = true;
 				}
 				instruction += 3;
 				break;

@@ -36,6 +36,7 @@ enum tokenEnum {
 	MINUS,
 	MULTIPLY,
 	DIVIDE,
+	MODULUS,
 	DEFINE,
 	COMMA,
 	PERIOD,
@@ -43,6 +44,7 @@ enum tokenEnum {
 	ELSE,
 	SWITCH,
 	CASE,
+	STRING,
 };
 
 class Lexer {

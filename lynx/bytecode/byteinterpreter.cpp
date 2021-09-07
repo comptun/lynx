@@ -264,6 +264,9 @@ void ByteInterpreter::interpret()
 		case SWITCH:
 
 			break;
+		case LOAD_BACK_REF:
+			stack.push_back(stack.size() - 1);
+			break;
 		}
 	}
 }

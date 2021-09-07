@@ -18,8 +18,12 @@ enum statement {
 
 class Interpreter : public Lexer, public Preprocessor {
 public:
+	unsigned int conditionalStage = 0;
+	bool isInConditional = false;
+	bool isInNameAssignment = false;
 	bool isInFunctionDefinition = false;
 	bool isInFunctionCall = false;
+	std::string currentComparisonOperator;
 	std::string currentName;
 	std::string functionName;
 	std::vector<int> nameScope;
