@@ -14,18 +14,22 @@ enum statement {
 	ELSE_STATEMENT,
 	ELIF_STATEMENT,
 	SWITCH_STATEMENT,
+	AND_STATEMENT,
+	UNKNOWN,
 };
 
 class Interpreter : public Lexer, public Preprocessor {
 public:
-	unsigned int conditionalStage = 0;
+	int pastConditional = UNKNOWN;
+	int conditionalStage = 0;
+	bool isInReturnStatement = false;
 	bool isInConditional = false;
 	bool isInNameAssignment = false;
 	bool isInFunctionDefinition = false;
 	bool isInFunctionCall = false;
 	std::string currentComparisonOperator;
 	std::string currentName;
-	std::string functionName;
+	std::vector<std::string> functionName;
 	std::vector<int> nameScope;
 	std::vector<std::string> knownNames;
 	std::vector<size_t> elseJump;

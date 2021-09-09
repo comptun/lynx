@@ -239,11 +239,11 @@ void ByteInterpreter::interpret()
 			stack.pop_back();
 			break;
 		case LOAD_PARAM:
-			stack.push_back(paramStack.at(0));
-			paramStack.erase(paramStack.begin());
+			stack.push_back(paramStack.back().at(0));
+			paramStack.back().erase(paramStack.back().begin());
 			break;
 		case STORE_PARAM:
-			paramStack.push_back(stack.back());
+			paramStack.back().push_back(stack.back());
 			break;
 		case LOAD_VAR_PARAM:
 			stack.push_back(vargParamStack.back().at(0));
@@ -266,6 +266,20 @@ void ByteInterpreter::interpret()
 			break;
 		case LOAD_BACK_REF:
 			stack.push_back(stack.size() - 1);
+			break;
+		case RETURN_VALUE:
+			returnedValue = stack.back();
+			break;
+		case LOAD_RETURN_VALUE:
+			stack.push_back(returnedValue);
+			break;
+		case NEW_PARAM_STACK: {
+			std::vector<int> newParamStack;
+			paramStack.push_back(newParamStack);
+			break;
+		}
+		case POP_PARAM_STACK:
+			paramStack.pop_back();
 			break;
 		}
 	}

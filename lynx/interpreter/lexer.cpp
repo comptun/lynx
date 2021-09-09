@@ -39,6 +39,8 @@ std::vector<std::string> tokenNames = {
 	"switch",
 	"case",
 	"STRING",
+	"return",
+	"&",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -79,6 +81,8 @@ std::vector<std::string> tokenTypes = {
 	"SWITCH",
 	"CASE",
 	"STRING",
+	"RETURN",
+	"AMPERSAND",
 };
 
 bool Lexer::isInteger(std::string num)
@@ -137,7 +141,7 @@ bool Lexer::isWhitespace(char chr)
 
 bool Lexer::special1Character(char character)
 {
-	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',' or character == ':';
+	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',' or character == ':' or character == '&';
 }
 
 bool Lexer::special2Character(char character, char character2)

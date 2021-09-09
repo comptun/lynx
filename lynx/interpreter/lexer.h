@@ -45,6 +45,8 @@ enum tokenEnum {
 	SWITCH,
 	CASE,
 	STRING,
+	RETURN,
+	AMPERSAND,
 };
 
 class Lexer {

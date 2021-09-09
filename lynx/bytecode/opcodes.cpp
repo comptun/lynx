@@ -19,7 +19,6 @@ std::vector<std::string> opcodes = {
 	"MOD",
 	"START_FUNCTION",
 	"END_FUNCTION",
-	"RETURN",
 	"LOAD_ARRAY",
 	"LOAD_ARRAY_REF",
 	"STORE_ARRAY",
@@ -33,6 +32,10 @@ std::vector<std::string> opcodes = {
 	"LOAD_VAR_PARAM",
 	"STORE_VAR_PARAM",
 	"LOAD_BACK_REF",
+	"RETURN_VALUE",
+	"LOAD_RETURN_VALUE",
+	"NEW_PARAM_STACK",
+	"POP_PARAM_STACK",
 };
 
 unsigned int ByteInterpreter::getOpcode(std::string code)

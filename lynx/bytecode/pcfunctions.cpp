@@ -24,8 +24,8 @@ void ByteInterpreter::executePCF(std::string funcName)
     }  
     switch (i) {
     case PRINT:
-        for (size_t i = 0; i < paramStack.size(); ++i) {
-            print(paramStack.at(i));
+        for (size_t i = 0; i < paramStack.back().size(); ++i) {
+            print(paramStack.back().at(i));
         }
         break;
     case ENDL:
@@ -48,13 +48,15 @@ void ByteInterpreter::executePCF(std::string funcName)
         stack.push_back(pow(stack.at(stack.size() - 2), stack.at(stack.size() - 1)));
         break;
     case PUTC:
-        for (size_t i = 0; i < paramStack.size(); ++i) {
-            std::cout << static_cast<char>(paramStack.at(i));
+        for (size_t i = 0; i < paramStack.back().size(); ++i) {
+            std::cout << static_cast<char>(paramStack.back().at(i));
         }
         break;
     case INPUT:
-        std::cin >> stack.at(stack.back());
+        for (size_t i = 0; i < paramStack.back().size(); ++i) {
+            std::cin >> stack.at(paramStack.back().at(i));
+        }
         break;
     }
-    paramStack.clear();
+    paramStack.pop_back();
 }
