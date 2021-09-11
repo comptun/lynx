@@ -268,6 +268,8 @@ void ByteInterpreter::interpret()
 			stack.push_back(stack.size() - 1);
 			break;
 		case RETURN_VALUE:
+			instruction = secondaryInstruction.back();
+			secondaryInstruction.pop_back();
 			returnedValue = stack.back();
 			break;
 		case LOAD_RETURN_VALUE:

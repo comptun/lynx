@@ -14,12 +14,14 @@ int main()
 
 	/*lynx.translate();
 	for (size_t i = 0; i < file.size(); i += 2) {
-		std::cout << file.at(i) << " " << file.at(i + 1) << std::endl;
+		std::cout << i << " " << file.at(i) << " " << file.at(i + 1) << std::endl;
 	}*/
 
 	/*for (size_t i = 0; i < lynx.codeFile.token.size(); ++i) {
 		std::cout << "\"" << lynx.codeFile.token.at(i) << "\"" << " : " << lynx.codeFile.type.at(i) << std::endl;
 	}*/
+
+	//lynx.translate();
 
 	lynx.translate();
 	lynx.interpret();

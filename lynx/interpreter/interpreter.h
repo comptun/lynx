@@ -22,6 +22,7 @@ class Interpreter : public Lexer, public Preprocessor {
 public:
 	int pastConditional = UNKNOWN;
 	int conditionalStage = 0;
+	int functionDepth = 0;
 	bool isInReturnStatement = false;
 	bool isInConditional = false;
 	bool isInNameAssignment = false;

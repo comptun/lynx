@@ -42,6 +42,7 @@ void Interpreter::preprocess()
 
 void Interpreter::bytecode(std::string instruction, std::string param)
 {
+	//std::cout << file.size() << " " << instruction << " " << param << std::endl;
 	file.push_back(instruction);
 	file.push_back(param);
 }
@@ -72,34 +73,27 @@ void Interpreter::translate()
 					bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 					break;
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 1));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 					break;
 				}
 				if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
 					switch (getToken(codeFile.type.at(instruction + 3))) {
 					case NAME:
-						file.push_back("LOAD_NAME");
-						file.push_back(codeFile.token.at(instruction + 3));
+						bytecode("LOAD_NAME", codeFile.token.at(instruction + 3));
 						break;
 					case CONSTANT_VALUE:
-						file.push_back("LOAD_CONST");
-						file.push_back(codeFile.token.at(instruction + 3));
+						bytecode("LOAD_CONST", codeFile.token.at(instruction + 3));
 						break;
 					}
-					file.push_back("COMPARE");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("COMPARE", codeFile.token.at(instruction + 2));
 					instruction += 4;
 				}
 				else {
-					file.push_back("LOAD_CONST");
-					file.push_back("1");
-					file.push_back("COMPARE");
-					file.push_back(">=");
+					bytecode("LOAD_CONST", "1");
+					bytecode("COMPARE", ">=");
 					instruction += 2;
 				}
-				file.push_back("JUMP_IF_FALSE");
-				file.push_back("0");
+				bytecode("JUMP_IF_FALSE", "0");
 				std::vector<size_t> vec;
 				jumpInstruction.push_back(vec);
 				jumpInstruction.back().push_back(file.size() - 1);
@@ -114,8 +108,7 @@ void Interpreter::translate()
 			}
 			break;
 		case JUMP_TO:
-			file.push_back("JUMP");
-			file.push_back(codeFile.token.at(instruction + 1));
+			bytecode("JUMP", codeFile.token.at(instruction + 1));
 			instruction += 2;
 			break;
 		case DEFINE:
@@ -125,12 +118,10 @@ void Interpreter::translate()
 			isInConditional = true;
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("LOAD_BACK_REF", "0");
@@ -139,38 +130,38 @@ void Interpreter::translate()
 			currentComparisonOperator = "undefined";
 			/*switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME");
+				bytecode(codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST");
+				bytecode(codeFile.token.at(instruction + 1));
 				break;
 			}
 			if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
 				switch (getToken(codeFile.type.at(instruction + 3))) {
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_NAME");
+					bytecode(codeFile.token.at(instruction + 3));
 					break;
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_CONST");
+					bytecode(codeFile.token.at(instruction + 3));
 					break;
 				}
-				file.push_back("COMPARE");
-				file.push_back(codeFile.token.at(instruction + 2));
+				bytecode("COMPARE");
+				bytecode(codeFile.token.at(instruction + 2));
 				instruction += 4;
 			}
 			else {
-				file.push_back("LOAD_CONST");
-				file.push_back("1");
-				file.push_back("COMPARE");
-				file.push_back(">=");
+				bytecode("LOAD_CONST");
+				bytecode("1");
+				bytecode("COMPARE");
+				bytecode(">=");
 				instruction += 2;
 			}
-			file.push_back("JUMP_IF_FALSE");
-			file.push_back("0");
+			bytecode("JUMP_IF_FALSE");
+			bytecode("0");
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
@@ -182,38 +173,30 @@ void Interpreter::translate()
 			continueJump.push_back(file.size() - 2);
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
 				switch (getToken(codeFile.type.at(instruction + 3))) {
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 3));
 					break;
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 3));
 					break;
 				}
-				file.push_back("COMPARE");
-				file.push_back(codeFile.token.at(instruction + 2));
+				bytecode("COMPARE", codeFile.token.at(instruction + 2));
 				instruction += 4;
 			}
 			else {
-				file.push_back("LOAD_CONST");
-				file.push_back("1");
-				file.push_back("COMPARE");
-				file.push_back(">=");
+				bytecode("LOAD_CONST", "1");
+				bytecode("COMPARE", ">=");
 				instruction += 2;
 			}
-			file.push_back("JUMP_IF_FALSE");
-			file.push_back("0");
+			bytecode("JUMP_IF_FALSE", "0");
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
@@ -224,75 +207,68 @@ void Interpreter::translate()
 		case AND:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
 				switch (getToken(codeFile.type.at(instruction + 3))) {
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 3));
 					break;
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 3));
 					break;
 				}
-				file.push_back("COMPARE");
-				file.push_back(codeFile.token.at(instruction + 2));
+				bytecode("COMPARE", codeFile.token.at(instruction + 2));
 				instruction += 4;
 			}
 			else {
-				file.push_back("LOAD_CONST");
-				file.push_back("1");
-				file.push_back("COMPARE");
-				file.push_back(">=");
+				bytecode("LOAD_CONST", "1");
+				bytecode("COMPARE", ">=");
 				instruction += 2;
 			}
-			file.push_back("JUMP_IF_FALSE");
-			file.push_back("0");
+			bytecode("JUMP_IF_FALSE", "0");
 			jumpInstruction.back().push_back(file.size() - 1);
 			break;
 		case FUNCTION:
 			isInFunctionDefinition = true;
 			if (codeFile.token.at(instruction + 2) == "(") {
-				file.push_back("START_FUNCTION");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("START_FUNCTION", codeFile.token.at(instruction + 1));
 				statementType.push_back(FUNCTION_STATEMENT);
 				instruction += 3;
 			}
+			if (codeFile.token.at(instruction) == ")") {
+				++instruction;
+				isInFunctionDefinition = false;
+			}
+			nameScope.push_back(0);
 			break;
 		case FUNCTION_END:
-			file.push_back("END_FUNCTION");
-			file.push_back("0");
+			bytecode("LOAD_CONST", "0");
+			bytecode("RETURN_VALUE", "0");
+			bytecode("END_FUNCTION", "0");
 			++instruction;
 			break;
 		case COMMA:
-			if (isInFunctionCall) {
-				bytecode("POP_BACK", "0");
-				bytecode("STORE_PARAM", "0");
-			}
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
 			instruction += 1;
 			break;
 		case RBRACKET:
-			if (isInFunctionDefinition) {
-				bytecode("POP_PARAM_STACK", "0");
-				instruction += 1;
-			}
 			if (functionName.size() > 0) {
 				bytecode("POP_BACK", "0");
 				bytecode("STORE_PARAM", "0");
+				bytecode("POP_BACK", "0");
 				bytecode("CALL", functionName.back());
 				bytecode("LOAD_RETURN_VALUE", "0");
 				bytecode("LOAD_STACK_BACK", "0");
 				functionName.pop_back();
+				--functionDepth;
 			}
-			isInFunctionCall = false;
 			isInFunctionDefinition = false;
 			++instruction;
 			break;
@@ -301,12 +277,10 @@ void Interpreter::translate()
 			currentComparisonOperator = "==";
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("LOAD_BACK_REF", "0");
@@ -315,12 +289,10 @@ void Interpreter::translate()
 		case PLUS:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("ADD", "0");
@@ -345,12 +317,10 @@ void Interpreter::translate()
 		case MINUS:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("SUB", "0");
@@ -367,12 +337,10 @@ void Interpreter::translate()
 		case MULTIPLY:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("MUL", "0");
@@ -389,12 +357,10 @@ void Interpreter::translate()
 		case DIVIDE:
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
 			bytecode("DIV", "0");
@@ -409,16 +375,10 @@ void Interpreter::translate()
 			instruction += 2;
 			break;
 		case CONSTANT_VALUE:
-			if (isInFunctionCall) {
-				bytecode("LOAD_CONST", codeFile.token.at(instruction));
-				bytecode("LOAD_BACK_REF", "0");
-				instruction += 1;
-				break;
-			}
+			bytecode("LOAD_CONST", codeFile.token.at(instruction));
+			bytecode("LOAD_BACK_REF", "0");
+			instruction += 1;
 			if (isInReturnStatement) {
-				bytecode("LOAD_CONST", codeFile.token.at(instruction));
-				bytecode("LOAD_BACK_REF", "0");
-				instruction += 1;
 				if (codeFile.token.at(instruction) != "+" and codeFile.token.at(instruction) != "-" and codeFile.token.at(instruction) != "*" and codeFile.token.at(instruction) != "/") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
@@ -464,17 +424,19 @@ void Interpreter::translate()
 				}
 				break;
 			}
+			if (codeFile.token.at(instruction + 1) == "(" and codeFile.token.at(instruction + 2) == ")") {
+				bytecode("CALL", codeFile.token.at(instruction));
+				bytecode("LOAD_RETURN_VALUE", "0");
+				bytecode("LOAD_STACK_BACK", "0");
+				--functionDepth;
+				instruction += 3;
+				break;
+			}
 			if (codeFile.token.at(instruction + 1) == "(") {
 				bytecode("NEW_PARAM_STACK", "0");
 				functionName.push_back(codeFile.token.at(instruction));
-				isInFunctionCall = true;
+				++functionDepth;
 				instruction += 2;
-				break;
-			}
-			if (isInFunctionCall) {
-				bytecode("LOAD_NAME", codeFile.token.at(instruction));
-				bytecode("LOAD_BACK_REF", "0");
-				instruction += 1;
 				break;
 			}
 			/*if (codeFile.token.at(instruction + 1) == ")" and isInFunctionCall) {
@@ -497,19 +459,21 @@ void Interpreter::translate()
 				instruction += 1;
 				break;
 			}
+			if (codeFile.token.at(instruction + 1) == "," or codeFile.token.at(instruction + 1) == ")") {
+				bytecode("LOAD_NAME", codeFile.token.at(instruction));
+				bytecode("LOAD_BACK_REF", "0");
+				instruction += 1;
+				break;
+			}
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case COLON:
-				file.push_back("LOAD_CONST");
-				file.push_back(std::to_string(file.size() - 2));
-				file.push_back("STORE_NAME");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("LOAD_CONST", std::to_string(file.size() - 2));
+				bytecode("STORE_NAME", codeFile.token.at(instruction));
 				break;
 			case LEFT_CURLY_BRACE:
-				file.push_back("START_FUNCTION");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("START_FUNCTION", codeFile.token.at(instruction));
 				if (codeFile.token.at(instruction + 2) == ":") {
-					file.push_back("STORE_NAME");
-					file.push_back(codeFile.token.at(instruction + 3));
+					bytecode("STORE_NAME", codeFile.token.at(instruction + 3));
 					instruction += 4;
 					break;
 				}
@@ -520,12 +484,10 @@ void Interpreter::translate()
 			case EQUALS:
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 2));
 					break;
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 2));
 					break;
 				}
 				if (nameExists(codeFile.token.at(instruction)) == false)
@@ -533,8 +495,7 @@ void Interpreter::translate()
 				if (codeFile.token.at(instruction + 3) != "+" and codeFile.token.at(instruction + 3) != "-" and codeFile.token.at(instruction + 3) != "*" and codeFile.token.at(instruction + 3) != "/") {
 					if (nameExists(codeFile.token.at(instruction)) == false)
 						knownNames.push_back(codeFile.token.at(instruction));
-					file.push_back("STORE_NAME");
-					file.push_back(codeFile.token.at(instruction));
+					bytecode("STORE_NAME", codeFile.token.at(instruction));
 				}
 				else {
 					currentName = codeFile.token.at(instruction);
@@ -544,51 +505,39 @@ void Interpreter::translate()
 				instruction += 3;
 				break;
 			case PLUS_EQUALS:
-				file.push_back("LOAD_REF");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("LOAD_REF", codeFile.token.at(instruction));
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 2));
 					break;
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 2));
 					break;
 				}
-				file.push_back("ADD");
-				file.push_back("0");
+				bytecode("ADD", "0");
 				instruction += 3;
 				break;
 			case MOD_EQUALS:
-				file.push_back("LOAD_REF");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("LOAD_REF", codeFile.token.at(instruction));
 				switch (getToken(codeFile.type.at(instruction + 2))) {
 				case CONSTANT_VALUE:
-					file.push_back("LOAD_CONST");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 2));
 					break;
 				case NAME:
-					file.push_back("LOAD_NAME");
-					file.push_back(codeFile.token.at(instruction + 2));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 2));
 					break;
 				}
-				file.push_back("MOD");
-				file.push_back("0");
+				bytecode("MOD", "0");
 				instruction += 3;
 				break;
 			case NAME:
-				file.push_back("LOAD_NAME");
-				file.push_back(codeFile.token.at(instruction + 1));
-				file.push_back("CALL");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
+				bytecode("CALL", codeFile.token.at(instruction));
 				instruction += 2;
 				break;
 			case CONSTANT_VALUE:
-				file.push_back("LOAD_CONST");
-				file.push_back(codeFile.token.at(instruction + 1));
-				file.push_back("CALL");
-				file.push_back(codeFile.token.at(instruction));
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
+				bytecode("CALL", codeFile.token.at(instruction));
 				instruction += 2;
 				break;
 			}
@@ -599,8 +548,7 @@ void Interpreter::translate()
 					bytecode("POP_BACK", "0");
 					bytecode("LOAD_CONST", "1");
 					bytecode("COMPARE", ">=");
-					file.push_back("JUMP_IF_FALSE");
-					file.push_back("0");
+					bytecode("JUMP_IF_FALSE", "0");
 					std::vector<size_t> vec;
 					jumpInstruction.push_back(vec);
 					jumpInstruction.back().push_back(file.size() - 1);
@@ -613,8 +561,7 @@ void Interpreter::translate()
 				if (isInConditional) {
 					bytecode("POP_BACK", "0");
 					bytecode("COMPARE", currentComparisonOperator);
-					file.push_back("JUMP_IF_FALSE");
-					file.push_back("0");
+					bytecode("JUMP_IF_FALSE", "0");
 					std::vector<size_t> vec;
 					jumpInstruction.push_back(vec);
 					jumpInstruction.back().push_back(file.size() - 1);
@@ -630,8 +577,7 @@ void Interpreter::translate()
 		}
 		case RIGHT_CURLY_BRACE:
 			for (size_t e = 0; e < nameScope.back(); ++e) {
-				file.push_back("POP_NAME");
-				file.push_back("0");
+				bytecode("POP_NAME", "0");
 			}
 			nameScope.pop_back();
 			switch (statementType.back()) {
@@ -639,8 +585,7 @@ void Interpreter::translate()
 				file.at(elseJump.back()) = std::to_string(file.size() - 2);
 				elseJump.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
-					file.push_back("JUMP");
-					file.push_back("0");
+					bytecode("JUMP", "0");
 					elseJump.push_back(file.size() - 1);
 				}
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
@@ -656,8 +601,7 @@ void Interpreter::translate()
 				break;
 			case IF_STATEMENT:
 				if (codeFile.token.at(instruction + 1) == "else") {
-					file.push_back("JUMP");
-					file.push_back("0");
+					bytecode("JUMP", "0");
 					elseJump.push_back(file.size() - 1);
 				}
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
@@ -675,14 +619,14 @@ void Interpreter::translate()
 				}
 				continueJump.pop_back();
 				breakJump.clear();
-				file.push_back("JUMP");
-				file.push_back(std::to_string(jumpInstruction.back().front() - 9));
+				bytecode("JUMP", std::to_string(jumpInstruction.back().front() - 9));
 				jumpInstruction.pop_back();
 				instruction += 1;
 				break;
 			case FUNCTION_STATEMENT:
-				file.push_back("END_FUNCTION");
-				file.push_back("0");
+				bytecode("LOAD_CONST", "0");
+				bytecode("RETURN_VALUE", "0");
+				bytecode("END_FUNCTION", "0");
 				++instruction;
 				break;
 			}
@@ -703,8 +647,7 @@ void Interpreter::translate()
 				file.at(breakJump.at(a)) = std::to_string(file.size());
 			}
 			breakJump.clear();
-			file.push_back("JUMP");
-			file.push_back(std::to_string(jumpInstruction.back().front() - 9));
+			bytecode("JUMP", std::to_string(jumpInstruction.back().front() - 9));
 			jumpInstruction.pop_back();
 			instruction += 1;
 			break;
