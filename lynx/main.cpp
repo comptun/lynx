@@ -1,13 +1,14 @@
 #include "lynx.h"
 #include "bytecode/byteinterpreter.h"
 #include "main.h"
-#include <time.h>
+#include <random>
+#include <ctime>
 
 Lynx lynx;
 
 int main()
 {
-	srand(time(NULL));
+	std::srand(std::random_device{}());
 	lynx.readCode(std::ifstream("code.txt"));
 	/*lynx.readFile(std::ifstream("bytecode.txt"));
 	lynx.interpret();*/

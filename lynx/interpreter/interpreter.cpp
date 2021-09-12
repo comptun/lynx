@@ -265,6 +265,7 @@ void Interpreter::translate()
 				bytecode("POP_BACK", "0");
 				bytecode("CALL", functionName.back());
 				bytecode("LOAD_RETURN_VALUE", "0");
+				bytecode("LOAD_RETURN_VALUE", "0");
 				bytecode("LOAD_STACK_BACK", "0");
 				functionName.pop_back();
 				--functionDepth;

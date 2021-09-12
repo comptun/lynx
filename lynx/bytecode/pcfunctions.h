@@ -11,6 +11,8 @@ enum PCFid {
     POW,
     PUTC,
     INPUT,
+    MAX,
+    MIN,
 };
 
 class PCFunctions {
