@@ -22,6 +22,7 @@ void Interpreter::preprocess()
 {
 	define("true", "1");
 	define("false", "0");
+	define("NULL", "0");
 	for (size_t i = 0; i < codeFile.token.size();) {
 		for (size_t j = 0; j < definitions.placeholder.size(); ++j) {
 			if (codeFile.token.at(i) == definitions.placeholder.at(j)) {
@@ -32,6 +33,12 @@ void Interpreter::preprocess()
 		}
 		if (codeFile.token.at(i) == "define") {
 			define(codeFile.token.at(i + 1), codeFile.token.at(i + 2));
+			codeFile.token.at(i).clear();
+			codeFile.token.at(i + 1).clear();
+			codeFile.token.at(i + 2).clear();
+			codeFile.type.at(i).clear();
+			codeFile.type.at(i + 1).clear();
+			codeFile.type.at(i + 2).clear();
 			i += 3;
 		}
 		else {

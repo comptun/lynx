@@ -38,6 +38,7 @@ enum tokenEnum {
 	DIVIDE,
 	MODULUS,
 	DEFINE,
+	IMPORT,
 	COMMA,
 	PERIOD,
 	JUMP_TO,

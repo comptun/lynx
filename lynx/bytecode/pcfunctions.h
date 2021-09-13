@@ -13,6 +13,11 @@ enum PCFid {
     INPUT,
     MAX,
     MIN,
+    SIN,
+    COS,
+    TAN,
+    LN,
+    ISPRIME,
 };
 
 class PCFunctions {

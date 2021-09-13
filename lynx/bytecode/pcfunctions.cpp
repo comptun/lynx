@@ -14,7 +14,12 @@ std::vector<std::string> PCFnames = {
     "putc",
     "input",
     "max",
-    "min"
+    "min",
+    "sin",
+    "cos",
+    "tan",
+    "ln",
+    "isprime",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -33,9 +38,11 @@ void ByteInterpreter::executePCF(std::string funcName)
     case ENDL:
         std::cout << std::endl;
         break;
-    case RAND:
-        returnedValue = std::rand() % paramStack.back().at(1) + paramStack.back().at(0);
+    case RAND: {
+        int difference = paramStack.back().at(1) - paramStack.back().at(0);
+        returnedValue = rand() % difference + paramStack.back().at(0);
         break;
+    }
     case SWAP: {
         int item1 = stack.at(paramStack.back().at(0));
         int item2 = stack.at(paramStack.back().at(1));
@@ -65,6 +72,32 @@ void ByteInterpreter::executePCF(std::string funcName)
     case MIN:
         returnedValue = (paramStack.back().at(1) > paramStack.back().at(0) ? paramStack.back().at(0) : paramStack.back().at(1));
         break;
+    case SIN:
+        returnedValue = sin(paramStack.back().at(0));
+        break;
+    case COS:
+        returnedValue = cos(paramStack.back().at(0));
+        break;
+    case TAN:
+        returnedValue = tan(paramStack.back().at(0));
+        break;
+    case LN:
+        returnedValue = log(paramStack.back().at(0));
+        break;
+    case ISPRIME: {
+        bool isPrime = true;
+        for (int a = 2; a < sqrt(paramStack.back().at(0)) + 1; ++a) {
+            if (paramStack.back().at(0) % a == 0) {
+                isPrime = false;
+                returnedValue = false;
+                break;
+            }
+        }
+        if (isPrime) {
+            returnedValue = true;
+        }
+        break;
+    }
     }
     paramStack.pop_back();
 }
