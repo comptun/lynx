@@ -26,5 +26,11 @@ int main()
 
 	lynx.translate();
 	lynx.interpret();
+
+	/*std::cout << "Stack: ";
+	for (size_t i = 0; i < lynx.stack.size(); ++i) {
+		std::cout << lynx.stack.at(i) << " ";
+	}*/
+
 	std::cin.get();
 }

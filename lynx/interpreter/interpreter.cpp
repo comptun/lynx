@@ -49,7 +49,7 @@ void Interpreter::preprocess()
 
 void Interpreter::bytecode(std::string instruction, std::string param)
 {
-	//std::cout << file.size() << " " << instruction << " " << param << std::endl;
+	std::cout << file.size() << " " << instruction << " " << param << std::endl;
 	file.push_back(instruction);
 	file.push_back(param);
 }
@@ -122,7 +122,6 @@ void Interpreter::translate()
 			instruction += 3;
 			break;
 		case IF: {
-			isInConditional = true;
 			switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
@@ -131,49 +130,29 @@ void Interpreter::translate()
 				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
 				break;
 			}
-			bytecode("LOAD_BACK_REF", "0");
-			instruction += 2;
-			pastConditional = IF_STATEMENT;
-			currentComparisonOperator = "undefined";
-			/*switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				bytecode("LOAD_NAME");
-				bytecode(codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				bytecode("LOAD_CONST");
-				bytecode(codeFile.token.at(instruction + 1));
-				break;
-			}
 			if (codeFile.token.at(instruction + 2) != "and" && codeFile.token.at(instruction + 2) != "or" && codeFile.token.at(instruction + 2) != "{") {
 				switch (getToken(codeFile.type.at(instruction + 3))) {
 				case NAME:
-					bytecode("LOAD_NAME");
-					bytecode(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_NAME", codeFile.token.at(instruction + 3));
 					break;
 				case CONSTANT_VALUE:
-					bytecode("LOAD_CONST");
-					bytecode(codeFile.token.at(instruction + 3));
+					bytecode("LOAD_CONST", codeFile.token.at(instruction + 3));
 					break;
 				}
-				bytecode("COMPARE");
-				bytecode(codeFile.token.at(instruction + 2));
+				bytecode("COMPARE", codeFile.token.at(instruction + 2));
 				instruction += 4;
 			}
 			else {
-				bytecode("LOAD_CONST");
-				bytecode("1");
-				bytecode("COMPARE");
-				bytecode(">=");
+				bytecode("LOAD_CONST", "1");
+				bytecode("COMPARE", ">=");
 				instruction += 2;
 			}
-			bytecode("JUMP_IF_FALSE");
-			bytecode("0");
+			bytecode("JUMP_IF_FALSE", "0");
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(IF_STATEMENT);
-			nameScope.push_back(0);*/
+			nameScope.push_back(0);
 			break;
 		}
 		case WHILE_LOOP: {
@@ -551,35 +530,7 @@ void Interpreter::translate()
 			}
 			break;
 		case LEFT_CURLY_BRACE: {
-			if (pastConditional == IF_STATEMENT) {
-				if (isInConditional and currentComparisonOperator == "undefined") {
-					bytecode("POP_BACK", "0");
-					bytecode("LOAD_CONST", "1");
-					bytecode("COMPARE", ">=");
-					bytecode("JUMP_IF_FALSE", "0");
-					std::vector<size_t> vec;
-					jumpInstruction.push_back(vec);
-					jumpInstruction.back().push_back(file.size() - 1);
-					statementType.push_back(IF_STATEMENT);
-					nameScope.push_back(0);
-					isInConditional = false;
-					++instruction;
-					break;
-				}
-				if (isInConditional) {
-					bytecode("POP_BACK", "0");
-					bytecode("COMPARE", currentComparisonOperator);
-					bytecode("JUMP_IF_FALSE", "0");
-					std::vector<size_t> vec;
-					jumpInstruction.push_back(vec);
-					jumpInstruction.back().push_back(file.size() - 1);
-					statementType.push_back(IF_STATEMENT);
-					nameScope.push_back(0);
-					isInConditional = false;
-					++instruction;
-					break;
-				}
-			}
+			
 			++instruction;
 			break;
 		}

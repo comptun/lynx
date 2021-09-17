@@ -90,16 +90,16 @@ void ByteInterpreter::interpret()
 			if (isInteger(file.at(instruction + 1))) {
 				stack.push_back(std::stoi(file.at(instruction + 1)));
 			}
-			// else if (isFloat(file.at(instruction + 1)))
-			// 	stack.push_back(std::stod(file.at(instruction + 1)));
-			// else
-			// 	stack.push_back(file.at(instruction + 1));
+			else if (isFloat(file.at(instruction + 1)))
+				stack.push_back(std::stod(file.at(instruction + 1)));
+			else
+			 	stack.push_back(file.at(instruction + 1));
 			break;
 		case LOAD_REF:
-			stack.push_back(getNameReference(file.at(instruction + 1)));
+			stack.push_back(static_cast<int>(getNameReference(file.at(instruction + 1))));
 			break;
 		case STORE_REF:
-			names.reference.at(getNameReference(file.at(instruction + 1))) = stack.back();
+			//names.reference.at(getNameReference(file.at(instruction + 1))) = stack.back();
 			break;
 		case LOAD_NAME:
 			stack.push_back(stack.at(getNameReference(file.at(instruction + 1))));
@@ -154,7 +154,7 @@ void ByteInterpreter::interpret()
 			if (isInteger(file.at(instruction + 1)))
 				instruction = std::stoi(file.at(instruction + 1));
 			else
-				instruction = stack.at(names.reference.at(getNameReference(file.at(instruction + 1))));
+				instruction = std::get<int>(stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))));
 			break;
 		case CALL:
 			if (doesNameExist(file.at(instruction + 1)) == false) {
@@ -162,7 +162,7 @@ void ByteInterpreter::interpret()
 			}
 			if (doesNameExist(file.at(instruction + 1)) == true) {
 				secondaryInstruction.push_back(instruction);
-				instruction = stack.at(getNameReference(file.at(instruction + 1)));
+				instruction = std::get<int>(stack.at(getNameReference(file.at(instruction + 1))));
 				/*for (size_t e = 0; e < file.size(); e += 2) {
 					if (file.at(e) == "START_FUNCTION" and file.at(e + 1) == file.at(instruction + 1)) {
 						instruction = e;
@@ -171,24 +171,39 @@ void ByteInterpreter::interpret()
 			}
 			break;
 		case ADD:
-			stack.at(stack.at(stack.size() - 2)) += stack.at(stack.size() - 1);
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<int>(stack.at(stack.size() - 1));
+			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<double>(stack.at(stack.size() - 1));
+			else if (std::holds_alternative<std::string>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<std::string>(stack.at(stack.size() - 1));
 			break;
 		case SUB:
-			stack.at(stack.at(stack.size() - 2)) -= stack.at(stack.size() - 1);
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<int>(stack.at(stack.size() - 1));
+			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<double>(stack.at(stack.size() - 1));
 			break;
 		case MUL:
-			stack.at(stack.at(stack.size() - 2)) *= stack.at(stack.size() - 1);
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<int>(stack.at(stack.size() - 1));
+			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<double>(stack.at(stack.size() - 1));
 			break;
 		case DIV:
-			stack.at(stack.at(stack.size() - 2)) /= stack.at(stack.size() - 1);
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<int>(stack.at(stack.size() - 1));
+			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<double>(stack.at(stack.size() - 1));
 			break;
 		case MOD:
-			stack.at(stack.at(stack.size() - 2)) %= stack.at(stack.size() - 1);
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) % std::get<int>(stack.at(stack.size() - 1));
 			break;
 		case START_FUNCTION:
 			names.identifier.push_back(file.at(instruction + 1));
 			names.reference.push_back(stack.size());
-			stack.push_back(instruction);
+			stack.push_back(static_cast<int>(instruction));
 			for (; file.at(instruction) != "END_FUNCTION"; instruction += 2);
 			break;
 		case END_FUNCTION:
@@ -204,7 +219,7 @@ void ByteInterpreter::interpret()
 			for (size_t j = 0; j < names.reference.size(); ++j) {
 				if (names.identifier.at(j) == file.at(instruction + 1))
 					++foundIdentifiers;
-				if (foundIdentifiers == stack.at(stack.size() - 1)) {
+				if (foundIdentifiers == std::get<int>(stack.at(stack.size() - 1))) {
 					stack.push_back(stack.at(names.reference.at(j)));
 					break;
 				}
@@ -212,7 +227,7 @@ void ByteInterpreter::interpret()
 			break;
 		}
 		case LOAD_ARRAY_REF:
-			 stack.push_back(getNameReference(file.at(instruction + 1)) + stack.back() + 1);
+			 stack.push_back(static_cast<int>(getNameReference(file.at(instruction + 1))) + std::get<int>(stack.back()) + 1);
 			 break;
 		case STORE_ARRAY: {
 			if (doesNameExist(file.at(instruction + 1))) {
@@ -220,7 +235,7 @@ void ByteInterpreter::interpret()
 				for (size_t j = 0; j < names.reference.size(); ++j) {
 					if (names.identifier.at(j) == file.at(instruction + 1))
 						++foundIdentifiers;
-					if (foundIdentifiers == stack.at(stack.size() - 1)) {
+					if (foundIdentifiers == std::get<int>(stack.at(stack.size() - 1))) {
 						stack.at(names.reference.at(j) - 1) = stack.at(stack.size() - 2);
 						break;
 					}
@@ -232,7 +247,7 @@ void ByteInterpreter::interpret()
 			break;
 		}
 		case PUSH_ARRAY: {
-			std::cout << stack.at(names.reference.at(getNameReference(file.at(instruction + 1))));
+			std::cout << std::get<int>(stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))));
 			break;
 		}
 		case POP_BACK:
@@ -243,7 +258,12 @@ void ByteInterpreter::interpret()
 			paramStack.back().erase(paramStack.back().begin());
 			break;
 		case STORE_PARAM:
-			paramStack.back().push_back(stack.back());
+			if (std::holds_alternative<int>(stack.back()))
+				paramStack.back().push_back(std::get<int>(stack.back()));
+			else if (std::holds_alternative<double>(stack.back()))
+				paramStack.back().push_back(std::get<double>(stack.back()));
+			else if (std::holds_alternative<std::string>(stack.back()))
+				paramStack.back().push_back(std::get<std::string>(stack.back()));
 			break;
 		case LOAD_VAR_PARAM:
 			stack.push_back(vargParamStack.back().at(0));
@@ -265,18 +285,18 @@ void ByteInterpreter::interpret()
 
 			break;
 		case LOAD_BACK_REF:
-			stack.push_back(stack.size() - 1);
+			stack.push_back(static_cast<int>(stack.size() - 1));
 			break;
 		case RETURN_VALUE:
 			instruction = secondaryInstruction.back();
 			secondaryInstruction.pop_back();
-			returnedValue = stack.back();
+			returnedValue = std::get<int>(stack.back());
 			break;
 		case LOAD_RETURN_VALUE:
 			stack.push_back(returnedValue);
 			break;
 		case NEW_PARAM_STACK: {
-			std::vector<int> newParamStack;
+			std::vector<std::variant<int, double, std::string>> newParamStack;
 			paramStack.push_back(newParamStack);
 			break;
 		}

@@ -32,38 +32,49 @@ void ByteInterpreter::executePCF(std::string funcName)
     switch (i) {
     case PRINT:
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
-            std::cout << paramStack.back().at(i);
+            if (std::holds_alternative<int>(paramStack.back().at(i)))
+                std::cout << std::get<int>(paramStack.back().at(i));
+            else if (std::holds_alternative<double>(paramStack.back().at(i)))
+                std::cout << std::get<double>(paramStack.back().at(i));
+            else if (std::holds_alternative<std::string>(paramStack.back().at(i)))
+                std::cout << std::get<std::string>(paramStack.back().at(i));
         }
         break;
     case ENDL:
-        std::cout << std::endl;
+        std::cout << "\n";
         break;
     case RAND: {
-        int difference = paramStack.back().at(1) - paramStack.back().at(0);
-        returnedValue = rand() % difference + paramStack.back().at(0);
+        int difference = std::get<int>(paramStack.back().at(1)) - std::get<int>(paramStack.back().at(0));
+        returnedValue = rand() % difference + std::get<int>(paramStack.back().at(0));
         break;
     }
     case SWAP: {
-        int item1 = stack.at(paramStack.back().at(0));
-        int item2 = stack.at(paramStack.back().at(1));
-        stack.at(paramStack.back().at(1)) = item2;
-        stack.at(paramStack.back().at(0)) = item1;
+        int item1 = std::get<int>(stack.at(std::get<int>(paramStack.back().at(0))));
+        int item2 = std::get<int>(stack.at(std::get<int>((paramStack.back().at(1)))));
+        stack.at(std::get<int>(paramStack.back().at(1))) = item2;
+        stack.at(std::get<int>(paramStack.back().at(0))) = item1;
         break;
     }
     case SQRT:
-        returnedValue = sqrt(paramStack.back().at(0));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = sqrt(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = sqrt(std::get<double>(paramStack.back().at(0)));
         break;
     case POW:
-        returnedValue = pow(paramStack.back().at(0), paramStack.back().at(1));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = pow(std::get<int>(paramStack.back().at(0)), std::get<int>(paramStack.back().at(1)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = pow(std::get<int>(paramStack.back().at(0)), std::get<int>(paramStack.back().at(1)));
         break;
     case PUTC:
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
-            std::cout << static_cast<char>(paramStack.back().at(i));
+            std::cout << static_cast<char>(std::get<int>(paramStack.back().at(i)));
         }
         break;
     case INPUT:
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
-            std::cin >> stack.at(paramStack.back().at(i));
+            std::cin >> std::get<int>(stack.at(std::get<int>(paramStack.back().at(i))));
         }
         break;
     case MAX:
@@ -73,21 +84,38 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = (paramStack.back().at(1) > paramStack.back().at(0) ? paramStack.back().at(0) : paramStack.back().at(1));
         break;
     case SIN:
-        returnedValue = sin(paramStack.back().at(0));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = sin(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = sin(std::get<double>(paramStack.back().at(0)));
         break;
     case COS:
-        returnedValue = cos(paramStack.back().at(0));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = cos(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = cos(std::get<double>(paramStack.back().at(0)));
         break;
     case TAN:
-        returnedValue = tan(paramStack.back().at(0));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = tan(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = tan(std::get<double>(paramStack.back().at(0)));
         break;
     case LN:
-        returnedValue = log(paramStack.back().at(0));
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = log(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = log(std::get<double>(paramStack.back().at(0)));
         break;
     case ISPRIME: {
         bool isPrime = true;
-        for (int a = 2; a < sqrt(paramStack.back().at(0)) + 1; ++a) {
-            if (paramStack.back().at(0) % a == 0) {
+        double sqrtNum = 0;
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            sqrtNum = sqrt(std::get<int>(paramStack.back().at(0)));
+        if (std::holds_alternative<double>(paramStack.back().at(0)))
+            sqrtNum = sqrt(std::get<double>(paramStack.back().at(0)));
+        for (int a = 2; a < sqrtNum; ++a) {
+            if (std::get<int>(paramStack.back().at(0)) % a == 0) {
                 isPrime = false;
                 returnedValue = false;
                 break;

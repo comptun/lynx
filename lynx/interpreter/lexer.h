@@ -59,6 +59,7 @@ public:
 	};
 	File codeFile;
 	void removeBlankspace();
+	bool isFloat(std::string num);
 	bool isInteger(std::string num);
 	bool special1Character(char character);
 	bool special2Character(char character, char character2);

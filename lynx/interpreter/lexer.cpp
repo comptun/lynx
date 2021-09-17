@@ -87,6 +87,16 @@ std::vector<std::string> tokenTypes = {
 	"AMPERSAND",
 };
 
+bool Lexer::isFloat(std::string num)
+{
+	unsigned int decimalCount = 0;
+	for (size_t i = 0; i < num.size(); ++i) {
+		if (!isdigit(num.at(i)) and num.at(i) != '.' or (num.at(i) == '.' and decimalCount > 0))
+			return false;
+	}
+	return true;
+}
+
 bool Lexer::isInteger(std::string num)
 {
 	for (size_t i = 0; i < num.size(); ++i) {
@@ -113,7 +123,7 @@ void Lexer::tokenize(std::string token)
 			codeFile.type.push_back("STRING");
 			return;
 		}
-		if (isInteger(token)) {
+		if (isInteger(token) or isFloat(token)) {
 			codeFile.type.push_back("CONSTANT_VALUE");
 			return;
 		}
