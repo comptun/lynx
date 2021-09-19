@@ -171,12 +171,21 @@ void ByteInterpreter::interpret()
 			}
 			break;
 		case ADD:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<int>(stack.at(stack.size() - 1));
-			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<int>(stack.at(stack.size() - 1));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) + std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<double>(stack.at(stack.size() - 1));
+
 			else if (std::holds_alternative<std::string>(stack.at(stack.size() - 1)))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<std::string>(stack.at(stack.size() - 1));
+			
 			break;
 		case SUB:
 			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))

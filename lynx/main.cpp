@@ -17,7 +17,7 @@ int main()
 	for (size_t i = 0; i < file.size(); i += 2) {
 		std::cout << i << " " << file.at(i) << " " << file.at(i + 1) << std::endl;
 	}*/
-
+	
 	/*for (size_t i = 0; i < lynx.codeFile.token.size(); ++i) {
 		std::cout << "\"" << lynx.codeFile.token.at(i) << "\"" << " : " << lynx.codeFile.type.at(i) << std::endl;
 	}*/
@@ -26,6 +26,12 @@ int main()
 
 	lynx.translate();
 	lynx.interpret();
+	if (std::get<int>(lynx.stack.at(lynx.names.reference.at(lynx.getNameReference("__BYTECODE__")))) == true) {
+		std::cout << "\nCOMPILED BYTECODE:\n";
+		for (size_t i = 0; i < file.size(); i += 2) {
+			std::cout << i << " " << file.at(i) << " " << file.at(i + 1) << std::endl;
+		}
+	}
 
 	/*std::cout << "Stack: ";
 	for (size_t i = 0; i < lynx.stack.size(); ++i) {

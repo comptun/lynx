@@ -49,7 +49,7 @@ void Interpreter::preprocess()
 
 void Interpreter::bytecode(std::string instruction, std::string param)
 {
-	std::cout << file.size() << " " << instruction << " " << param << std::endl;
+	//std::cout << file.size() << " " << instruction << " " << param << std::endl;
 	file.push_back(instruction);
 	file.push_back(param);
 }
@@ -69,6 +69,11 @@ void Interpreter::translate()
 
 	bytecode("LOAD_CONST", "0");
 	bytecode("STORE_NAME", "LYNX_START");
+	nameScope.back() += 1;
+
+	bytecode("LOAD_CONST", "0");
+	bytecode("STORE_NAME", "__BYTECODE__");
+	nameScope.back() += 1;
 
 	for (size_t instruction = 0; instruction < codeFile.token.size();) {
 		switch (getToken(codeFile.type.at(instruction))) {

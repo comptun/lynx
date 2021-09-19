@@ -120,7 +120,7 @@ void Lexer::tokenize(std::string token)
 			size_t offset = codeFile.token.back().size() - 2;
 			codeFile.token.back().erase(codeFile.token.back().begin());
 			codeFile.token.back().erase(offset);
-			codeFile.type.push_back("STRING");
+			codeFile.type.push_back("CONSTANT_VALUE");
 			return;
 		}
 		if (isInteger(token) or isFloat(token)) {

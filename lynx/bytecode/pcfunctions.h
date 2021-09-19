@@ -18,6 +18,9 @@ enum PCFid {
     TAN,
     LN,
     ISPRIME,
+    INT_CAST,
+    FLOAT_CAST,
+    STRING_CAST,
 };
 
 class PCFunctions {
