@@ -255,9 +255,10 @@ void Interpreter::translate()
 				bytecode("STORE_PARAM", "0");
 				bytecode("POP_BACK", "0");
 				bytecode("CALL", functionName.back());
-				bytecode("LOAD_RETURN_VALUE", "0");
-				bytecode("LOAD_RETURN_VALUE", "0");
-				bytecode("LOAD_STACK_BACK", "0");
+				if (functionName.size() > 1) {
+					bytecode("LOAD_RETURN_VALUE", "0");
+					bytecode("LOAD_BACK_REF", "0");
+				}
 				functionName.pop_back();
 				--functionDepth;
 			}
@@ -374,6 +375,7 @@ void Interpreter::translate()
 				if (codeFile.token.at(instruction) != "+" and codeFile.token.at(instruction) != "-" and codeFile.token.at(instruction) != "*" and codeFile.token.at(instruction) != "/") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
+					bytecode("POP_BACK", "0");
 					isInReturnStatement = false;
 				}
 				break;
@@ -419,7 +421,7 @@ void Interpreter::translate()
 			if (codeFile.token.at(instruction + 1) == "(" and codeFile.token.at(instruction + 2) == ")") {
 				bytecode("CALL", codeFile.token.at(instruction));
 				bytecode("LOAD_RETURN_VALUE", "0");
-				bytecode("LOAD_STACK_BACK", "0");
+				bytecode("LOAD_BACK_REF", "0");
 				--functionDepth;
 				instruction += 3;
 				break;
@@ -439,15 +441,19 @@ void Interpreter::translate()
 			}*/
 
 			if (codeFile.token.at(instruction + 1) == "," and isInFunctionDefinition) {
+				knownNames.push_back(codeFile.token.at(instruction));
 				bytecode("LOAD_PARAM", "0");
 				bytecode("STORE_NAME", codeFile.token.at(instruction));
+				nameScope.back() += 1;
 				instruction += 2;
 				break;
 			}
 			if (codeFile.token.at(instruction + 1) == ")" and isInFunctionDefinition) {
+				knownNames.push_back(codeFile.token.at(instruction));
 				bytecode("LOAD_PARAM", "0");
 				bytecode("STORE_NAME", codeFile.token.at(instruction));
 				bytecode("POP_PARAM_STACK", "0");
+				nameScope.back() += 1;
 				instruction += 1;
 				break;
 			}
@@ -540,12 +546,12 @@ void Interpreter::translate()
 			break;
 		}
 		case RIGHT_CURLY_BRACE:
-			for (size_t e = 0; e < nameScope.back(); ++e) {
-				bytecode("POP_NAME", "0");
-			}
-			nameScope.pop_back();
 			switch (statementType.back()) {
 			case ELIF_STATEMENT:
+				for (size_t e = 0; e < nameScope.back(); ++e) {
+					bytecode("POP_NAME", "0");
+				}
+				nameScope.pop_back();
 				file.at(elseJump.back()) = std::to_string(file.size() - 2);
 				elseJump.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
@@ -559,11 +565,19 @@ void Interpreter::translate()
 				instruction += 1;
 				break;
 			case ELSE_STATEMENT:
+				for (size_t e = 0; e < nameScope.back(); ++e) {
+					bytecode("POP_NAME", "0");
+				}
+				nameScope.pop_back();
 				file.at(elseJump.back()) = std::to_string(file.size() - 2);
 				elseJump.pop_back();
 				instruction += 1;
 				break;
 			case IF_STATEMENT:
+				for (size_t e = 0; e < nameScope.back(); ++e) {
+					bytecode("POP_NAME", "0");
+				}
+				nameScope.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
 					bytecode("JUMP", "0");
 					elseJump.push_back(file.size() - 1);
@@ -585,9 +599,17 @@ void Interpreter::translate()
 				breakJump.clear();
 				bytecode("JUMP", std::to_string(jumpInstruction.back().front() - 9));
 				jumpInstruction.pop_back();
+				for (size_t e = 0; e < nameScope.back(); ++e) {
+					bytecode("POP_NAME", "0");
+				}
+				nameScope.pop_back();
 				instruction += 1;
 				break;
 			case FUNCTION_STATEMENT:
+				for (size_t e = 0; e < nameScope.back(); ++e) {
+					bytecode("POP_NAME", "0");
+				}
+				nameScope.pop_back();
 				bytecode("LOAD_CONST", "0");
 				bytecode("RETURN_VALUE", "0");
 				bytecode("END_FUNCTION", "0");

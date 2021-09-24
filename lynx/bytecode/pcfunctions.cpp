@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <math.h>
+#include <bits/stdc++.h>
 
 std::vector<std::string> PCFnames = {
     "print",
@@ -23,6 +24,9 @@ std::vector<std::string> PCFnames = {
     "int",
     "float",
     "string",
+    "len",
+    "reverse",
+    "sort",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -79,7 +83,7 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     }
     case ENDL:
-        std::cout << "\n";
+        returnedValue = "\n";
         break;
     case RAND: {
         int difference = std::get<int>(paramStack.back().at(1)) - std::get<int>(paramStack.back().at(0));
@@ -112,7 +116,7 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     case INPUT: {
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
-            int input = 0;
+            std::string input;
             std::cin >> input;
             stack.at(std::get<int>(paramStack.back().at(i))) = input;
         }
@@ -174,6 +178,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             returnedValue = static_cast<int>(std::get<double>(paramStack.back().at(0)));
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = std::stoi(std::get<std::string>(paramStack.back().at(0)));
+        break;
     case FLOAT_CAST:
         if (std::holds_alternative<int>(paramStack.back().at(0)))
             returnedValue = static_cast<double>(std::get<int>(paramStack.back().at(0)));
@@ -181,6 +186,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             returnedValue = paramStack.back().at(0);
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = std::stod(std::get<std::string>(paramStack.back().at(0)));
+        break;
     case STRING_CAST:
         if (std::holds_alternative<int>(paramStack.back().at(0)))
             returnedValue = std::to_string(std::get<int>(paramStack.back().at(0)));
@@ -188,6 +194,17 @@ void ByteInterpreter::executePCF(std::string funcName)
             returnedValue = std::to_string(std::get<double>(paramStack.back().at(0)));
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = paramStack.back().at(0);
+        break;
+    case LEN:
+        returnedValue = static_cast<int>(std::get<std::string>(paramStack.back().at(0)).size());
+        break;
+    case REVERSE:
+        std::reverse(std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).begin(), std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).end());
+        break;
+    case SORT:
+        std::sort(std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).begin(), std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).end());
     }
+    /*stack.push_back(returnedValue);
+    stack.push_back(static_cast<int>(stack.size() - 1));*/
     paramStack.pop_back();
 }

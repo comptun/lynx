@@ -87,9 +87,8 @@ void ByteInterpreter::interpret()
 	for (instruction = 0; instruction < file.size(); instruction += 2) {
 		switch (getOpcode(file.at(instruction))) {
 		case LOAD_CONST:
-			if (isInteger(file.at(instruction + 1))) {
+			if (isInteger(file.at(instruction + 1)))
 				stack.push_back(std::stoi(file.at(instruction + 1)));
-			}
 			else if (isFloat(file.at(instruction + 1)))
 				stack.push_back(std::stod(file.at(instruction + 1)));
 			else
@@ -287,6 +286,7 @@ void ByteInterpreter::interpret()
 			names.identifier.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
 			break;
 		case POP_NAME:
+			stack.at(names.reference.back()) = 0;
 			names.reference.pop_back();
 			names.identifier.pop_back();
 			break;
