@@ -42,6 +42,7 @@ std::vector<std::string> tokenNames = {
 	"STRING",
 	"return",
 	"&",
+	";",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -85,6 +86,7 @@ std::vector<std::string> tokenTypes = {
 	"STRING",
 	"RETURN",
 	"AMPERSAND",
+	"SEMI_COLON",
 };
 
 bool Lexer::isFloat(std::string num)
@@ -116,7 +118,7 @@ void Lexer::tokenize(std::string token)
 				return;
 			}
 		}
-		if (token.at(0) == '"') {
+		if (token.at(0) == '"' or token.at(0) == '\'') {
 			size_t offset = codeFile.token.back().size() - 2;
 			codeFile.token.back().erase(codeFile.token.back().begin());
 			codeFile.token.back().erase(offset);
@@ -153,7 +155,14 @@ bool Lexer::isWhitespace(char chr)
 
 bool Lexer::special1Character(char character)
 {
-	return character == '{' or character == '}' or character == '(' or character == ')' or character == ',' or character == ':' or character == '&';
+	return character == '{' 
+		or character == '}' 
+		or character == '(' 
+		or character == ')' 
+		or character == ',' 
+		or character == ':' 
+		or character == '&'
+		or character == ';';
 }
 
 bool Lexer::special2Character(char character, char character2)
@@ -206,7 +215,7 @@ void Lexer::readCode(std::ifstream fileName)
 	while (getline(fileName, line)) {
 		int tabNum = 0;
 		for (size_t i = 0; i < line.length(); ++i) {
-			if (line.at(i) == '"') {
+			if (line.at(i) == '"' or line.at(i) == '\'') {
 				if (isInString)
 					isInString = false;
 				else

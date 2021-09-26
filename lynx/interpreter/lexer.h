@@ -48,6 +48,7 @@ enum tokenEnum {
 	STRING,
 	RETURN,
 	AMPERSAND,
+	SEMI_COLON,
 };
 
 class Lexer {

@@ -286,9 +286,9 @@ void ByteInterpreter::interpret()
 			names.identifier.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
 			break;
 		case POP_NAME:
-			stack.at(names.reference.back()) = 0;
+			/*stack.erase(stack.begin() + names.reference.back());
 			names.reference.pop_back();
-			names.identifier.pop_back();
+			names.identifier.pop_back();*/
 			break;
 		case SWITCH:
 

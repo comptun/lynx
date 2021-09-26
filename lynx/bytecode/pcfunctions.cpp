@@ -4,6 +4,7 @@
 #include <vector>
 #include <math.h>
 #include <bits/stdc++.h>
+#include <conio.h>
 
 std::vector<std::string> PCFnames = {
     "print",
@@ -24,9 +25,15 @@ std::vector<std::string> PCFnames = {
     "int",
     "float",
     "string",
+    "char",
     "len",
     "reverse",
     "sort",
+    "asin",
+    "acos",
+    "atan",
+    "keyPressed",
+    "getKeyPressed",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -195,6 +202,12 @@ void ByteInterpreter::executePCF(std::string funcName)
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = paramStack.back().at(0);
         break;
+    case CHAR_CAST:
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = std::string(1, static_cast<char>(std::get<int>(paramStack.back().at(0))));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = std::string(1, static_cast<char>(std::get<double>(paramStack.back().at(0))));
+        break;
     case LEN:
         returnedValue = static_cast<int>(std::get<std::string>(paramStack.back().at(0)).size());
         break;
@@ -203,6 +216,40 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     case SORT:
         std::sort(std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).begin(), std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).end());
+        break;
+    case ASIN:
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = asin(std::get<int>(paramStack.back().at(0)));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = asin(std::get<double>(paramStack.back().at(0)));
+        break;
+    case ACOS:
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = acos(std::get<int>(paramStack.back().at(0)));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = acos(std::get<double>(paramStack.back().at(0)));
+        break;
+    case ATAN:
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = atan(std::get<int>(paramStack.back().at(0)));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = atan(std::get<double>(paramStack.back().at(0)));
+        break;
+    case KEYPRESSED: {
+        char key = _getch();
+        char keypressed = ' ';
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            keypressed = std::get<int>(paramStack.back().at(0));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            keypressed = std::get<int>(paramStack.back().at(0));
+        else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
+            keypressed = std::get<std::string>(paramStack.back().at(0)).at(0);
+        returnedValue = key == keypressed;
+        break;
+    }
+    case GETKEYPRESSED:
+        returnedValue = std::string(1, _getch());
+        break;
     }
     /*stack.push_back(returnedValue);
     stack.push_back(static_cast<int>(stack.size() - 1));*/

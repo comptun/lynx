@@ -21,9 +21,15 @@ enum PCFid {
     INT_CAST,
     FLOAT_CAST,
     STRING_CAST,
+    CHAR_CAST,
     LEN,
     REVERSE,
     SORT,
+    ASIN,
+    ACOS,
+    ATAN,
+    KEYPRESSED,
+    GETKEYPRESSED,
 };
 
 class PCFunctions {
