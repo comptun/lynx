@@ -257,11 +257,17 @@ void Interpreter::translate()
 					bytecode("POP_BACK", "0");
 				}
 				bytecode("CALL", functionName.back());
-				if (functionName.size() > 1) {
+				if (functionName.size() > 1 or isInNameAssignment) {
 					bytecode("LOAD_RETURN_VALUE", "0");
 					bytecode("LOAD_BACK_REF", "0");
+					if (functionOperatorType.back() != "NULL") {
+						bytecode("POP_BACK", "0");
+						bytecode(functionOperatorType.back(), "0");
+						bytecode("POP_BACK", "0");
+					}
 				}
 				functionName.pop_back();
+				functionOperatorType.pop_back();
 				--functionDepth;
 			}
 			isInFunctionDefinition = false;
@@ -282,55 +288,76 @@ void Interpreter::translate()
 			instruction += 2;
 			break;
 		case PLUS:
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				if (codeFile.type.at(instruction + 2) == "(") {
+			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
+				if (codeFile.token.at(instruction + 2) == "(") {
+					bytecode("NEW_PARAM_STACK", "0");
+					functionName.push_back(codeFile.token.at(instruction + 1));
+					++functionDepth;
+					functionOperatorType.push_back("ADD");
+					instruction += 3;
 					break;
 				}
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
+			}
+			else if (getToken(codeFile.type.at(instruction + 1)) == CONSTANT_VALUE) {
 				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
-				break;
 			}
 			bytecode("ADD", "0");
 			bytecode("POP_BACK", "0");
 			instruction += 2;
 			break;
 		case MINUS:
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
+			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
+				if (codeFile.token.at(instruction + 2) == "(") {
+					bytecode("NEW_PARAM_STACK", "0");
+					functionName.push_back(codeFile.token.at(instruction + 1));
+					++functionDepth;
+					functionOperatorType.push_back("SUB");
+					instruction += 3;
+					break;
+				}
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
+			}
+			else if (getToken(codeFile.type.at(instruction + 1)) == CONSTANT_VALUE) {
 				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
-				break;
 			}
 			bytecode("SUB", "0");
 			bytecode("POP_BACK", "0");
 			instruction += 2;
 			break;
 		case MULTIPLY:
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
+			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
+				if (codeFile.token.at(instruction + 2) == "(") {
+					bytecode("NEW_PARAM_STACK", "0");
+					functionName.push_back(codeFile.token.at(instruction + 1));
+					++functionDepth;
+					functionOperatorType.push_back("MUL");
+					instruction += 3;
+					break;
+				}
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
+			}
+			else if (getToken(codeFile.type.at(instruction + 1)) == CONSTANT_VALUE) {
 				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
-				break;
 			}
 			bytecode("MUL", "0");
 			bytecode("POP_BACK", "0");
 			instruction += 2;
 			break;
 		case DIVIDE:
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
+			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
+				if (codeFile.token.at(instruction + 2) == "(") {
+					bytecode("NEW_PARAM_STACK", "0");
+					functionName.push_back(codeFile.token.at(instruction + 1));
+					++functionDepth;
+					functionOperatorType.push_back("DIV");
+					instruction += 3;
+					break;
+				}
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
+			}
+			else if (getToken(codeFile.type.at(instruction + 1)) == CONSTANT_VALUE) {
 				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
-				break;
 			}
 			bytecode("DIV", "0");
 			bytecode("POP_BACK", "0");
@@ -341,7 +368,10 @@ void Interpreter::translate()
 			bytecode("LOAD_BACK_REF", "0");
 			instruction += 1;
 			if (isInReturnStatement) {
-				if (codeFile.token.at(instruction) != "+" and codeFile.token.at(instruction) != "-" and codeFile.token.at(instruction) != "*" and codeFile.token.at(instruction) != "/") {
+				if (codeFile.token.at(instruction) != "+" 
+					and codeFile.token.at(instruction) != "-" 
+					and codeFile.token.at(instruction) != "*" 
+					and codeFile.token.at(instruction) != "/") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
 					bytecode("POP_BACK", "0");
@@ -380,7 +410,10 @@ void Interpreter::translate()
 				bytecode("LOAD_NAME", codeFile.token.at(instruction));
 				bytecode("LOAD_BACK_REF", "0");
 				instruction += 1;
-				if (codeFile.token.at(instruction) != "+" and codeFile.token.at(instruction) != "-" and codeFile.token.at(instruction) != "*" and codeFile.token.at(instruction) != "/") {
+				if (codeFile.token.at(instruction) != "+" 
+					and codeFile.token.at(instruction) != "-" 
+					and codeFile.token.at(instruction) != "*" 
+					and codeFile.token.at(instruction) != "/") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
 					isInReturnStatement = false;
@@ -398,6 +431,7 @@ void Interpreter::translate()
 			if (codeFile.token.at(instruction + 1) == "(") {
 				bytecode("NEW_PARAM_STACK", "0");
 				functionName.push_back(codeFile.token.at(instruction));
+				functionOperatorType.push_back("NULL");
 				++functionDepth;
 				instruction += 2;
 				break;
@@ -426,40 +460,41 @@ void Interpreter::translate()
 				instruction += 1;
 				break;
 			}
-			if (codeFile.token.at(instruction + 1) == "," or codeFile.token.at(instruction + 1) == ")") {
+			if (codeFile.token.at(instruction + 1) == "," 
+				or codeFile.token.at(instruction + 1) == ")" 
+				or codeFile.token.at(instruction + 1) == "+" 
+				or codeFile.token.at(instruction + 1) == "-" 
+				or codeFile.token.at(instruction + 1) == "*" 
+				or codeFile.token.at(instruction + 1) == "/") {
 				bytecode("LOAD_NAME", codeFile.token.at(instruction));
 				bytecode("LOAD_BACK_REF", "0");
 				instruction += 1;
 				break;
 			}
 			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case COLON:
-				bytecode("LOAD_CONST", std::to_string(file.size() - 2));
-				bytecode("STORE_NAME", codeFile.token.at(instruction));
-				break;
-			case LEFT_CURLY_BRACE:
-				bytecode("START_FUNCTION", codeFile.token.at(instruction));
-				if (codeFile.token.at(instruction + 2) == ":") {
-					bytecode("STORE_NAME", codeFile.token.at(instruction + 3));
-					instruction += 4;
-					break;
-				}
-				statementType.push_back(FUNCTION_STATEMENT);
-				nameScope.push_back(0);
-				instruction += 2;
-				break;
 			case EQUALS:
-				switch (getToken(codeFile.type.at(instruction + 2))) {
-				case CONSTANT_VALUE:
+				if (getToken(codeFile.type.at(instruction + 2)) == CONSTANT_VALUE) {
 					bytecode("LOAD_CONST", codeFile.token.at(instruction + 2));
-					break;
-				case NAME:
+				}
+				else if (getToken(codeFile.type.at(instruction + 2)) == NAME) {
+					if (codeFile.token.at(instruction + 3) == "(") {
+						bytecode("NEW_PARAM_STACK", "0");
+						functionName.push_back(codeFile.token.at(instruction + 2));
+						++functionDepth;
+						functionOperatorType.push_back("NULL");
+						currentName = codeFile.token.at(instruction);
+						isInNameAssignment = true;
+						instruction += 4;
+						break;
+					}
 					bytecode("LOAD_NAME", codeFile.token.at(instruction + 2));
-					break;
 				}
 				if (nameExists(codeFile.token.at(instruction)) == false)
 						nameScope.back() += 1;
-				if (codeFile.token.at(instruction + 3) != "+" and codeFile.token.at(instruction + 3) != "-" and codeFile.token.at(instruction + 3) != "*" and codeFile.token.at(instruction + 3) != "/") {
+				if (codeFile.token.at(instruction + 3) != "+" 
+					and codeFile.token.at(instruction + 3) != "-" 
+					and codeFile.token.at(instruction + 3) != "*" 
+					and codeFile.token.at(instruction + 3) != "/") {
 					if (nameExists(codeFile.token.at(instruction)) == false)
 						knownNames.push_back(codeFile.token.at(instruction));
 					bytecode("STORE_NAME", codeFile.token.at(instruction));
@@ -642,6 +677,8 @@ void Interpreter::translate()
 				isInReturnStatement = false;
 				break;
 			}
+			isInNameAssignment = false;
+			isInReturnStatement = false;
 			instruction += 1;
 			break;
 		}

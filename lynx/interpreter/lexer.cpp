@@ -93,6 +93,8 @@ bool Lexer::isFloat(std::string num)
 {
 	unsigned int decimalCount = 0;
 	for (size_t i = 0; i < num.size(); ++i) {
+		if (i == 0 and num.at(0) == '-')
+			continue;
 		if (!isdigit(num.at(i)) and num.at(i) != '.' or (num.at(i) == '.' and decimalCount > 0))
 			return false;
 	}
@@ -102,6 +104,8 @@ bool Lexer::isFloat(std::string num)
 bool Lexer::isInteger(std::string num)
 {
 	for (size_t i = 0; i < num.size(); ++i) {
+		if (i == 0 and num.at(0) == '-')
+			continue;
 		if (!isdigit(num.at(i)))
 			return false;
 	}

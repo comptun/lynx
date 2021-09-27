@@ -30,6 +30,7 @@ public:
 	bool isInFunctionCall = false;
 	std::string currentComparisonOperator;
 	std::string currentName;
+	std::vector<std::string> functionOperatorType;
 	std::vector<std::string> functionName;
 	std::vector<int> nameScope;
 	std::vector<std::string> knownNames;
