@@ -363,6 +363,25 @@ void Interpreter::translate()
 			bytecode("POP_BACK", "0");
 			instruction += 2;
 			break;
+		case MODULUS:
+			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
+				if (codeFile.token.at(instruction + 2) == "(") {
+					bytecode("NEW_PARAM_STACK", "0");
+					functionName.push_back(codeFile.token.at(instruction + 1));
+					++functionDepth;
+					functionOperatorType.push_back("MOD");
+					instruction += 3;
+					break;
+				}
+				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
+			}
+			else if (getToken(codeFile.type.at(instruction + 1)) == CONSTANT_VALUE) {
+				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
+			}
+			bytecode("MOD", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 2;
+			break;
 		case CONSTANT_VALUE:
 			bytecode("LOAD_CONST", codeFile.token.at(instruction));
 			bytecode("LOAD_BACK_REF", "0");
@@ -371,7 +390,8 @@ void Interpreter::translate()
 				if (codeFile.token.at(instruction) != "+" 
 					and codeFile.token.at(instruction) != "-" 
 					and codeFile.token.at(instruction) != "*" 
-					and codeFile.token.at(instruction) != "/") {
+					and codeFile.token.at(instruction) != "/"
+					and codeFile.token.at(instruction) != "%") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
 					bytecode("POP_BACK", "0");
@@ -413,7 +433,8 @@ void Interpreter::translate()
 				if (codeFile.token.at(instruction) != "+" 
 					and codeFile.token.at(instruction) != "-" 
 					and codeFile.token.at(instruction) != "*" 
-					and codeFile.token.at(instruction) != "/") {
+					and codeFile.token.at(instruction) != "/"
+					and codeFile.token.at(instruction) != "%") {
 					bytecode("POP_BACK", "0");
 					bytecode("RETURN_VALUE", "0");
 					isInReturnStatement = false;
@@ -465,7 +486,8 @@ void Interpreter::translate()
 				or codeFile.token.at(instruction + 1) == "+" 
 				or codeFile.token.at(instruction + 1) == "-" 
 				or codeFile.token.at(instruction + 1) == "*" 
-				or codeFile.token.at(instruction + 1) == "/") {
+				or codeFile.token.at(instruction + 1) == "/"
+				or codeFile.token.at(instruction + 1) == "%") {
 				bytecode("LOAD_NAME", codeFile.token.at(instruction));
 				bytecode("LOAD_BACK_REF", "0");
 				instruction += 1;
@@ -494,7 +516,8 @@ void Interpreter::translate()
 				if (codeFile.token.at(instruction + 3) != "+" 
 					and codeFile.token.at(instruction + 3) != "-" 
 					and codeFile.token.at(instruction + 3) != "*" 
-					and codeFile.token.at(instruction + 3) != "/") {
+					and codeFile.token.at(instruction + 3) != "/"
+					and codeFile.token.at(instruction + 3) != "%") {
 					if (nameExists(codeFile.token.at(instruction)) == false)
 						knownNames.push_back(codeFile.token.at(instruction));
 					bytecode("STORE_NAME", codeFile.token.at(instruction));

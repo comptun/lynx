@@ -30,6 +30,7 @@ enum PCFid {
     ATAN,
     KEYPRESSED,
     GETKEYPRESSED,
+    PARENTHESIS,
 };
 
 class PCFunctions {

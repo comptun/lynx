@@ -115,6 +115,13 @@ bool Lexer::isInteger(std::string num)
 void Lexer::tokenize(std::string token)
 {
 	if (token != "" && token != " ") {
+		if (token == "(" and codeFile.type.back() != "NAME") {
+			codeFile.token.push_back("parenthesis");
+			codeFile.type.push_back("NAME");
+			codeFile.token.push_back("(");
+			codeFile.type.push_back("LBRACKET");
+			return;
+		}
 		codeFile.token.push_back(token);
 		for (size_t i = 0; i < tokenNames.size(); ++i) {
 			if (tokenNames.at(i) == token) {
@@ -122,7 +129,12 @@ void Lexer::tokenize(std::string token)
 				return;
 			}
 		}
-		if (token.at(0) == '"' or token.at(0) == '\'') {
+		if (token.at(0) == '\'') {
+			codeFile.token.back() = std::to_string(static_cast<int>(codeFile.token.back().at(1)));
+			codeFile.type.push_back("CONSTANT_VALUE");
+			return;
+		}
+		if (token.at(0) == '"') {
 			size_t offset = codeFile.token.back().size() - 2;
 			codeFile.token.back().erase(codeFile.token.back().begin());
 			codeFile.token.back().erase(offset);

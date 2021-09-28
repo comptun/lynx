@@ -34,6 +34,7 @@ std::vector<std::string> PCFnames = {
     "atan",
     "keyPressed",
     "getKeyPressed",
+    "parenthesis",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -123,10 +124,50 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     case INPUT: {
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
-            std::string input;
-            std::cin >> input;
-            stack.at(std::get<int>(paramStack.back().at(i))) = input;
+            if (std::holds_alternative<int>(paramStack.back().at(i)))
+                std::cout << std::get<int>(paramStack.back().at(i));
+            else if (std::holds_alternative<double>(paramStack.back().at(i)))
+                std::cout << std::get<double>(paramStack.back().at(i));
+            else if (std::holds_alternative<std::string>(paramStack.back().at(i))) {
+                bool isInVariableCall = false;
+                std::string varName;
+                for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(i)).size();) {
+                    if (isInVariableCall) {
+                        if (std::get<std::string>(paramStack.back().at(i)).at(j) == '}') {
+                            if (std::holds_alternative<int>(stack.at(getNameReference(varName))))
+                                std::cout << std::get<int>(stack.at(getNameReference(varName)));
+                            else if (std::holds_alternative<double>(stack.at(getNameReference(varName))))
+                                std::cout << std::get<double>(stack.at(getNameReference(varName)));
+                            else if (std::holds_alternative<std::string>(stack.at(getNameReference(varName))))
+                                std::cout << std::get<std::string>(stack.at(getNameReference(varName)));
+                            varName.clear();
+                            ++j;
+                            isInVariableCall = false;
+                            continue;
+                        }
+                        varName += std::get<std::string>(paramStack.back().at(i)).at(j);
+                        ++j;
+                        continue;
+                    }
+                    if (std::get<std::string>(paramStack.back().at(i)).at(j) == '{') {
+                        isInVariableCall = true;
+                        ++j;
+                        continue;
+                    }
+                    if (std::get<std::string>(paramStack.back().at(i)).at(j) == '\\'
+                        and std::get<std::string>(paramStack.back().at(i)).at(j + 1) == 'n') {
+                        std::cout << "\n";
+                        j += 2;
+                        continue;
+                    }
+                    std::cout << std::get<std::string>(paramStack.back().at(i)).at(j);
+                    ++j;
+                }
+            }
         }
+        std::string input;
+        std::cin >> input;
+        returnedValue = input;
         break;
     }
     case MAX:
@@ -211,12 +252,18 @@ void ByteInterpreter::executePCF(std::string funcName)
     case LEN:
         returnedValue = static_cast<int>(std::get<std::string>(paramStack.back().at(0)).size());
         break;
-    case REVERSE:
-        std::reverse(std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).begin(), std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).end());
+    case REVERSE: {
+        std::string revString = std::get<std::string>(paramStack.back().at(0));
+        std::reverse(revString.begin(), revString.end());
+        returnedValue = revString;
         break;
-    case SORT:
-        std::sort(std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).begin(), std::get<std::string>(stack.at(std::get<int>(paramStack.back().at(0)))).end());
+    }
+    case SORT: {
+        std::string sortString = std::get<std::string>(paramStack.back().at(0));
+        std::sort(sortString.begin(), sortString.end());
+        returnedValue = sortString;
         break;
+    }
     case ASIN:
         if (std::holds_alternative<int>(paramStack.back().at(0)))
             returnedValue = asin(std::get<int>(paramStack.back().at(0)));
@@ -248,7 +295,10 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     }
     case GETKEYPRESSED:
-        returnedValue = std::string(1, _getch());
+        returnedValue = _getch();
+        break;
+    case PARENTHESIS:
+        returnedValue = paramStack.back().at(0);
         break;
     }
     /*stack.push_back(returnedValue);
