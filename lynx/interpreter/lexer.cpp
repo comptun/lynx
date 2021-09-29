@@ -6,10 +6,15 @@ std::vector<std::string> tokenNames = {
 	"while",
 	"for",
 	"and",
+	"or",
+	"xor",
 	"function",
 	"endfunction",
 	"=",
 	"==",
+	">=",
+	"<=",
+	"!=",
 	"+=",
 	"-=",
 	"/=",
@@ -50,10 +55,15 @@ std::vector<std::string> tokenTypes = {
 	"WHILE_LOOP",
 	"FOR_LOOP",
 	"AND",
+	"OR",
+	"XOR",
 	"FUNCTION",
 	"END_FUNCTION",
 	"EQUALS",
 	"EQUAL_TO",
+	"HIGHER_THAN_EQUAL_TO",
+	"LESS_THAN_EQUAL_TO",
+	"NOT_EQUAL_TO",
 	"PLUS_EQUALS",
 	"MINUS_EQUALS",
 	"DIVIDE_EQUALS",
@@ -115,7 +125,10 @@ bool Lexer::isInteger(std::string num)
 void Lexer::tokenize(std::string token)
 {
 	if (token != "" && token != " ") {
-		if (token == "(" and codeFile.type.back() != "NAME") {
+		if (token == "(" 
+			and (codeFile.type.back() != "NAME" 
+			and codeFile.type.back() != "IF_STATEMENT"
+			and codeFile.type.back() != "WHILE_LOOP")) {
 			codeFile.token.push_back("parenthesis");
 			codeFile.type.push_back("NAME");
 			codeFile.token.push_back("(");
@@ -184,7 +197,9 @@ bool Lexer::special1Character(char character)
 		or character == '-'
 		or character == '*'
 		or character == '/'
-		or character == '%';
+		or character == '%'
+		or character == '>'
+		or character == '<';
 }
 
 bool Lexer::special2Character(std::string characters)
@@ -193,6 +208,8 @@ bool Lexer::special2Character(std::string characters)
 		or characters == "!="
 		or characters == "<="
 		or characters == ">="
+		or characters == "&&"
+		or characters == "||";
 }
 
 void Lexer::removeBlankspace()

@@ -18,7 +18,8 @@ int main()
 		std::cout << i << " " << file.at(i) << " " << file.at(i + 1) << std::endl;
 	}*/
 	
-	/*for (size_t i = 0; i < lynx.codeFile.token.size(); ++i) {
+	/*lynx.translate();
+	for (size_t i = 0; i < lynx.codeFile.token.size(); ++i) {
 		std::cout << "\"" << lynx.codeFile.token.at(i) << "\"" << " : " << lynx.codeFile.type.at(i) << std::endl;
 	}*/
 

@@ -12,10 +12,15 @@ enum tokenEnum {
 	WHILE_LOOP,
 	FOR_LOOP,
 	AND,
+	OR,
+	XOR,
 	FUNCTION,
 	FUNCTION_END,
 	EQUALS,
 	EQUAL_TO,
+	GREATER_THAN_EQUAL_TO,
+	LESS_THAN_EQUAL_TO,
+	NOT_EQUAL_TO,
 	PLUS_EQUALS,
 	MINUS_EQUALS,
 	DIVIDE_EQUALS,
@@ -63,7 +68,7 @@ public:
 	bool isFloat(std::string num);
 	bool isInteger(std::string num);
 	bool special1Character(char character);
-	bool special2Character(char character, char character2);
+	bool special2Character(std::string characters);
 	void tokenize(std::string token);
 	void retokenize(std::string token, size_t pos);
 	bool isWhitespace(char chr);

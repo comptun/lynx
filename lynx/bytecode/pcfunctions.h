@@ -34,6 +34,21 @@ enum PCFid {
     CEIL,
     FLOOR,
     ABS,
+    BOOLEXPR,
+    IF_EXPR,
+    WHILE_EXPR,
+};
+
+enum booleanExpressions {
+    AND_EXPR = 0,
+    OR_EXPR,
+    XOR_EXPR,
+    EQUAL_TO_EXPR,
+    NOT_EQUAL_TO_EXPR,
+    LESS_THAN_EXPR,
+    GREATER_THAN_EXPR,
+    LESS_THAN_EQUAL_TO_EXPR,
+    GREATER_THAN_EQUAL_TO_EXPR,
 };
 
 class PCFunctions {

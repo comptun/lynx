@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include "../bytecode/pcfunctions.h"
 #include "../bytecode/byteinterpreter.h"
 
 int Interpreter::getToken(std::string str)
@@ -20,6 +21,8 @@ bool Interpreter::nameExists(std::string name)
 
 void Interpreter::preprocess()
 {
+	define("&&", "and");
+	define("||", "or");
 	define("true", "1");
 	define("false", "0");
 	define("NULL", "0");
@@ -79,7 +82,7 @@ void Interpreter::translate()
 		switch (getToken(codeFile.type.at(instruction))) {
 		case ELSE:
 			if (codeFile.token.at(instruction + 1) == "if") {
-				++instruction;
+				/*++instruction;
 				switch (getToken(codeFile.type.at(instruction + 1))) {
 				case NAME:
 					bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
@@ -104,13 +107,21 @@ void Interpreter::translate()
 					bytecode("LOAD_CONST", "1");
 					bytecode("COMPARE", ">=");
 					instruction += 2;
-				}
-				bytecode("JUMP_IF_FALSE", "0");
+				}*/
+				statementType.push_back(ELIF_STATEMENT);
+				bytecode("NEW_PARAM_STACK", "0");
+				functionName.push_back("if");
+				functionOperatorType.push_back("NULL");
+				++functionDepth;
 				std::vector<size_t> vec;
 				jumpInstruction.push_back(vec);
-				jumpInstruction.back().push_back(file.size() - 1);
-				statementType.push_back(ELIF_STATEMENT);
-				nameScope.push_back(0);
+				instruction += 3;
+				//bytecode("JUMP_IF_FALSE", "0");
+				//std::vector<size_t> vec;
+				//jumpInstruction.push_back(vec);
+				//jumpInstruction.back().push_back(file.size() - 1);
+				//statementType.push_back(ELIF_STATEMENT);
+				//nameScope.push_back(0);
 				break;
 			}
 			else {
@@ -127,7 +138,16 @@ void Interpreter::translate()
 			instruction += 3;
 			break;
 		case IF: {
-			switch (getToken(codeFile.type.at(instruction + 1))) {
+			statementType.push_back(IF_STATEMENT);
+			bytecode("NEW_PARAM_STACK", "0");
+			functionName.push_back("if");
+			functionOperatorType.push_back("NULL");
+			++functionDepth;
+			std::vector<size_t> vec;
+			jumpInstruction.push_back(vec);
+			instruction += 2;
+
+			/*switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
@@ -157,12 +177,12 @@ void Interpreter::translate()
 			jumpInstruction.push_back(vec);
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(IF_STATEMENT);
-			nameScope.push_back(0);
+			nameScope.push_back(0);*/
 			break;
 		}
 		case WHILE_LOOP: {
 			continueJump.push_back(file.size() - 2);
-			switch (getToken(codeFile.type.at(instruction + 1))) {
+			/*switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
@@ -193,10 +213,20 @@ void Interpreter::translate()
 			jumpInstruction.back().push_back(file.size() - 1);
 			statementType.push_back(WHILE_STATEMENT);
 			nameScope.push_back(0);
+			break;*/
+			statementType.push_back(WHILE_STATEMENT);
+			std::vector<size_t> vec;
+			jumpInstruction.push_back(vec);
+			jumpInstruction.back().push_back(file.size() - 2);
+			bytecode("NEW_PARAM_STACK", "0");
+			functionName.push_back("while");
+			functionOperatorType.push_back("NULL");
+			++functionDepth;
+			instruction += 2;
 			break;
 		}
 		case AND:
-			switch (getToken(codeFile.type.at(instruction + 1))) {
+			/*switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
 				break;
@@ -223,6 +253,33 @@ void Interpreter::translate()
 			}
 			bytecode("JUMP_IF_FALSE", "0");
 			jumpInstruction.back().push_back(file.size() - 1);
+			break;*/
+
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(AND_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case OR:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(OR_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case XOR:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(XOR_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
 			break;
 		case FUNCTION:
 			isInFunctionDefinition = true;
@@ -266,26 +323,20 @@ void Interpreter::translate()
 						bytecode("POP_BACK", "0");
 					}
 				}
+				if (functionName.back() == "if" or functionName.back() == "while") {
+					bytecode("LOAD_RETURN_VALUE", "0");
+					bytecode("LOAD_CONST", "1");
+					bytecode("COMPARE", "==");
+					bytecode("JUMP_IF_FALSE", "0");
+					jumpInstruction.back().push_back(file.size() - 1);
+					nameScope.push_back(0);
+				}
 				functionName.pop_back();
 				functionOperatorType.pop_back();
 				--functionDepth;
 			}
 			isInFunctionDefinition = false;
 			++instruction;
-			break;
-		case EQUAL_TO:
-			bytecode("POP_BACK", "0");
-			currentComparisonOperator = "==";
-			switch (getToken(codeFile.type.at(instruction + 1))) {
-			case NAME:
-				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
-				break;
-			case CONSTANT_VALUE:
-				bytecode("LOAD_CONST", codeFile.token.at(instruction + 1));
-				break;
-			}
-			bytecode("LOAD_BACK_REF", "0");
-			instruction += 2;
 			break;
 		case PLUS:
 			if (getToken(codeFile.type.at(instruction + 1)) == NAME) {
@@ -487,7 +538,16 @@ void Interpreter::translate()
 				or codeFile.token.at(instruction + 1) == "-" 
 				or codeFile.token.at(instruction + 1) == "*" 
 				or codeFile.token.at(instruction + 1) == "/"
-				or codeFile.token.at(instruction + 1) == "%") {
+				or codeFile.token.at(instruction + 1) == "%"
+				or codeFile.token.at(instruction + 1) == "=="
+				or codeFile.token.at(instruction + 1) == "!="
+				or codeFile.token.at(instruction + 1) == ">="
+				or codeFile.token.at(instruction + 1) == "<="
+				or codeFile.token.at(instruction + 1) == ">"
+				or codeFile.token.at(instruction + 1) == "<"
+				or codeFile.token.at(instruction + 1) == "and"
+				or codeFile.token.at(instruction + 1) == "or"
+				or codeFile.token.at(instruction + 1) == "xor") {
 				bytecode("LOAD_NAME", codeFile.token.at(instruction));
 				bytecode("LOAD_BACK_REF", "0");
 				instruction += 1;
@@ -619,15 +679,15 @@ void Interpreter::translate()
 				instruction += 1;
 				break;
 			case WHILE_STATEMENT:
-				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size());
-				}
+
+					file.at(jumpInstruction.back().at(1)) = std::to_string(file.size());
+
 				for (size_t a = 0; a < breakJump.size(); ++a) {
 					file.at(breakJump.at(a)) = std::to_string(file.size() + 2);
 				}
 				continueJump.pop_back();
 				breakJump.clear();
-				bytecode("JUMP", std::to_string(jumpInstruction.back().front() - 9));
+				bytecode("JUMP", std::to_string(jumpInstruction.back().at(0)));
 				jumpInstruction.pop_back();
 				for (size_t e = 0; e < nameScope.back(); ++e) {
 					knownNames.pop_back();
@@ -702,6 +762,42 @@ void Interpreter::translate()
 			}
 			isInNameAssignment = false;
 			isInReturnStatement = false;
+			instruction += 1;
+			break;
+		case EQUAL_TO:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(EQUAL_TO_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case NOT_EQUAL_TO:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(NOT_EQUAL_TO_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case LESS_THAN_EQUAL_TO:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(LESS_THAN_EQUAL_TO_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case GREATER_THAN_EQUAL_TO:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(GREATER_THAN_EQUAL_TO_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
 			instruction += 1;
 			break;
 		}
