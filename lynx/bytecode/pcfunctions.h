@@ -31,6 +31,9 @@ enum PCFid {
     KEYPRESSED,
     GETKEYPRESSED,
     PARENTHESIS,
+    CEIL,
+    FLOOR,
+    ABS,
 };
 
 class PCFunctions {

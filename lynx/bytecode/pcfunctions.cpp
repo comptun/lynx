@@ -35,6 +35,9 @@ std::vector<std::string> PCFnames = {
     "keyPressed",
     "getKeyPressed",
     "parenthesis",
+    "ceil",
+    "floor",
+    "abs",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -299,6 +302,20 @@ void ByteInterpreter::executePCF(std::string funcName)
         break;
     case PARENTHESIS:
         returnedValue = paramStack.back().at(0);
+        break;
+    case CEIL:
+        returnedValue = ceil(std::get<float>(paramStack.back().at(0)));
+        break;
+    case FLOOR:
+        returnedValue = floor(std::get<float>(paramStack.back().at(0)));
+        break;
+    case ABS:
+        if (std::holds_alternative<int>(paramStack.back().at(0))) {
+            returnedValue = abs(std::get<float>(paramStack.back().at(0)));
+        }
+        else if (std::holds_alternative<float>(paramStack.back().at(0))) {
+            returnedValue = fabs(std::get<float>(paramStack.back().at(0)));
+        }
         break;
     }
     /*stack.push_back(returnedValue);
