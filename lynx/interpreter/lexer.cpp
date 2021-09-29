@@ -178,34 +178,21 @@ bool Lexer::special1Character(char character)
 		or character == ',' 
 		or character == ':' 
 		or character == '&'
-		or character == ';';
+		or character == ';'
+		or character == '='
+		or character == '+'
+		or character == '-'
+		or character == '*'
+		or character == '/'
+		or character == '%';
 }
 
-bool Lexer::special2Character(char character, char character2)
+bool Lexer::special2Character(std::string characters)
 {
-	switch (character) {
-	case '=':
-		switch (character2) {
-		case '=':
-			return true;
-		}
-	case '!':
-		switch (character2) {
-		case '=':
-			return true;
-		}
-	case '>':
-		switch (character2) {
-		case '=':
-			return true;
-		}
-	case '<':
-		switch (character2) {
-		case '=':
-			return true;
-		}
-	}
-	return false;
+	return characters == "=="
+		or characters == "!="
+		or characters == "<="
+		or characters == ">="
 }
 
 void Lexer::removeBlankspace()
@@ -252,6 +239,15 @@ void Lexer::readCode(std::ifstream fileName)
 					++i;
 					continue;
 				}*/
+				if (i < line.length() - 1) {
+					if (special2Character(std::string(1, line.at(i)) + line.at(i + 1))) {
+						tokenize(lineContent);
+						lineContent.clear();
+						tokenize(std::string(1, line.at(i)) + line.at(i + 1));
+						i += 1;
+						continue;
+					}
+				}
 				if (special1Character(line.at(i))) {
 					tokenize(lineContent);
 					lineContent.clear();
