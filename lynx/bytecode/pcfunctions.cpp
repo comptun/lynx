@@ -353,6 +353,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
                 firstRound.push_back(false);
                 break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
             }
             if (j + 3 < paramStack.back().size() - 1) {
                 firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -434,6 +448,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
                 firstRound.push_back(false);
                 break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
             }
             if (j + 3 < paramStack.back().size() - 1) {
                 firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -510,6 +538,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 break;
             case LESS_THAN_EQUAL_TO_EXPR:
                 if (paramStack.back().at(j) <= paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
                     firstRound.push_back(true);
                     break;
                 }

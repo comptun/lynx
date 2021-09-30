@@ -800,6 +800,24 @@ void Interpreter::translate()
 			bytecode("POP_BACK", "0");
 			instruction += 1;
 			break;
+		case LESS_THAN:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(LESS_THAN_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case GREATER_THAN:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(GREATER_THAN_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
 		}
 	}
 }
