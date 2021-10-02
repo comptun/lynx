@@ -186,9 +186,10 @@ void Lexer::retokenize(std::string token, size_t pos)
 	codeFile.type.at(pos) = "NAME";
 }
 
-bool Lexer::isWhitespace(char chr)
+bool Lexer::isWhitespace(char character)
 {
-	return chr == char(32) or chr == char(13);
+	return character == char(32) 
+		or character == char(13);
 }
 
 bool Lexer::special1Character(char character)
@@ -208,7 +209,9 @@ bool Lexer::special1Character(char character)
 		or character == '/'
 		or character == '%'
 		or character == '>'
-		or character == '<';
+		or character == '<'
+		or character == '['
+		or character == ']';
 }
 
 bool Lexer::special2Character(std::string characters)
@@ -218,7 +221,9 @@ bool Lexer::special2Character(std::string characters)
 		or characters == "<="
 		or characters == ">="
 		or characters == "&&"
-		or characters == "||";
+		or characters == "||"
+		or characters == "++"
+		or characters == "--";
 }
 
 void Lexer::removeBlankspace()
