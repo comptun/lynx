@@ -303,9 +303,91 @@ void ByteInterpreter::executePCF(std::string funcName)
     case GETKEYPRESSED:
         returnedValue = _getch();
         break;
-    case PARENTHESIS:
+    case PARENTHESIS: {
+        if (paramStack.back().size() > 1) {
+            std::vector<int> firstRound;
+            std::vector<int> secondRound;
+            for (size_t j = 0; j < paramStack.back().size();) {
+                switch (std::get<int>(paramStack.back().at(j + 1))) {
+                case EQUAL_TO_EXPR:
+                    if (paramStack.back().at(j) == paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
+                case NOT_EQUAL_TO_EXPR:
+                    if (paramStack.back().at(j) != paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
+                case GREATER_THAN_EQUAL_TO_EXPR:
+                    if (paramStack.back().at(j) >= paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
+                case LESS_THAN_EQUAL_TO_EXPR:
+                    if (paramStack.back().at(j) <= paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
+                }
+                if (j + 3 < paramStack.back().size() - 1) {
+                    firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
+                    j += 4;
+                    continue;
+                }
+                j += 3;
+            }
+            if (firstRound.size() > 1) {
+                for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
+                    switch (firstRound.at(j + 1)) {
+                    case AND_EXPR:
+                        if (firstRound.at(j) and firstRound.at(j + 2)) {
+                            secondRound.push_back(true);
+                            break;
+                        }
+                        secondRound.push_back(false);
+                        break;
+                    case OR_EXPR:
+                        if (firstRound.at(j) or firstRound.at(j + 2)) {
+                            secondRound.push_back(true);
+                            break;
+                        }
+                        secondRound.push_back(false);
+                        break;
+                    case XOR_EXPR:
+                        if (firstRound.at(j) xor firstRound.at(j + 2)) {
+                            secondRound.push_back(true);
+                            break;
+                        }
+                        secondRound.push_back(false);
+                        break;
+                    }
+                }
+            }
+            else {
+                secondRound.push_back(firstRound.at(0));
+            }
+            for (size_t j = 0; j < secondRound.size(); j += 1) {
+                if (secondRound.at(j) == false) {
+                    returnedValue = false;
+                    paramStack.pop_back();
+                    return;
+                }
+            }
+            returnedValue = true;
+            break;
+        }
         returnedValue = paramStack.back().at(0);
         break;
+    }
     /*case CEIL:
         returnedValue = ceil(std::get<float>(paramStack.back().at(0)));
         break;
@@ -353,6 +435,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
                 firstRound.push_back(false);
                 break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
             }
             if (j + 3 < paramStack.back().size() - 1) {
                 firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -362,7 +458,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             j += 3;
         }
         if (firstRound.size() > 1) {
-            for (size_t j = 0; j < firstRound.size(); j += 3) {
+            for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
                 switch (firstRound.at(j + 1)) {
                 case AND_EXPR:
                     if (firstRound.at(j) and firstRound.at(j + 2)) {
@@ -434,6 +530,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
                 firstRound.push_back(false);
                 break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
             }
             if (j + 3 < paramStack.back().size() - 1) {
                 firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -443,7 +553,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             j += 3;
         }
         if (firstRound.size() > 1) {
-            for (size_t j = 0; j < firstRound.size(); j += 3) {
+            for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
                 switch (firstRound.at(j + 1)) {
                 case AND_EXPR:
                     if (firstRound.at(j) and firstRound.at(j + 2)) {
@@ -467,7 +577,7 @@ void ByteInterpreter::executePCF(std::string funcName)
                     secondRound.push_back(false);
                     break;
                 }
-            }
+            }                   
         }
         else {
             secondRound.push_back(firstRound.at(0));
@@ -515,6 +625,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
                 firstRound.push_back(false);
                 break;
+            case GREATER_THAN_EXPR:
+                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
+            case LESS_THAN_EXPR:
+                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                    firstRound.push_back(true);
+                    break;
+                }
+                firstRound.push_back(false);
+                break;
             }
             if (j + 3 < paramStack.back().size() - 1) {
                 firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -524,7 +648,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             j += 3;
         }
         if (firstRound.size() > 1) {
-            for (size_t j = 0; j < firstRound.size(); j += 3) {
+            for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
                 switch (firstRound.at(j + 1)) {
                 case AND_EXPR:
                     if (firstRound.at(j) and firstRound.at(j + 2)) {

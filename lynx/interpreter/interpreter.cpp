@@ -680,10 +680,10 @@ void Interpreter::translate()
 				break;
 			case WHILE_STATEMENT:
 
-					file.at(jumpInstruction.back().at(1)) = std::to_string(file.size());
+				file.at(jumpInstruction.back().at(1)) = std::to_string(file.size());
 
 				for (size_t a = 0; a < breakJump.size(); ++a) {
-					file.at(breakJump.at(a)) = std::to_string(file.size() + 2);
+					file.at(breakJump.at(a)) = std::to_string(file.size());
 				}
 				continueJump.pop_back();
 				breakJump.clear();
@@ -796,6 +796,24 @@ void Interpreter::translate()
 			bytecode("STORE_PARAM", "0");
 			bytecode("POP_BACK", "0");
 			bytecode("LOAD_CONST", std::to_string(GREATER_THAN_EQUAL_TO_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case LESS_THAN:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(LESS_THAN_EXPR));
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			instruction += 1;
+			break;
+		case GREATER_THAN:
+			bytecode("POP_BACK", "0");
+			bytecode("STORE_PARAM", "0");
+			bytecode("POP_BACK", "0");
+			bytecode("LOAD_CONST", std::to_string(GREATER_THAN_EXPR));
 			bytecode("STORE_PARAM", "0");
 			bytecode("POP_BACK", "0");
 			instruction += 1;

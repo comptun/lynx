@@ -36,7 +36,12 @@ int main()
 
 	/*std::cout << "Stack: ";
 	for (size_t i = 0; i < lynx.stack.size(); ++i) {
-		std::cout << lynx.stack.at(i) << " ";
+		if (std::holds_alternative<int>(lynx.stack.at(i)))
+			std::cout << std::get<int>(lynx.stack.at(i)) << " ";
+		if (std::holds_alternative<double>(lynx.stack.at(i)))
+			std::cout << std::get<double>(lynx.stack.at(i)) << " ";
+		if (std::holds_alternative<std::string>(lynx.stack.at(i)))
+			std::cout << "\"" << std::get<std::string>(lynx.stack.at(i)) << "\" ";
 	}*/
 
 	std::cin.get();

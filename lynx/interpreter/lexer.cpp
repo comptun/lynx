@@ -1,4 +1,4 @@
-#include "lexer.h"
+﻿#include "lexer.h"
 #include <iostream>
 
 std::vector<std::string> tokenNames = {
@@ -14,6 +14,8 @@ std::vector<std::string> tokenNames = {
 	"==",
 	">=",
 	"<=",
+	">",
+	"<",
 	"!=",
 	"+=",
 	"-=",
@@ -63,6 +65,8 @@ std::vector<std::string> tokenTypes = {
 	"EQUAL_TO",
 	"HIGHER_THAN_EQUAL_TO",
 	"LESS_THAN_EQUAL_TO",
+	"GREATER_THAN",
+	"LESS_THAN",
 	"NOT_EQUAL_TO",
 	"PLUS_EQUALS",
 	"MINUS_EQUALS",
@@ -133,6 +137,11 @@ void Lexer::tokenize(std::string token)
 			codeFile.type.push_back("NAME");
 			codeFile.token.push_back("(");
 			codeFile.type.push_back("LBRACKET");
+			return;
+		}
+		if (token == "__EMPTY_STRING__") {
+			codeFile.token.push_back(std::string(1,0));
+			codeFile.type.push_back("CONSTANT_VALUE");
 			return;
 		}
 		codeFile.token.push_back(token);
@@ -214,7 +223,7 @@ bool Lexer::special2Character(std::string characters)
 
 void Lexer::removeBlankspace()
 {
-	size_t pos = 0;
+	/*size_t pos = 0;
 	for (auto i = codeFile.token.begin(); i != codeFile.token.end(); ++i, ++pos) {
 		if (codeFile.token.at(pos) == "" or codeFile.token.at(pos) == " ") {
 			codeFile.token.erase(i);
@@ -224,7 +233,7 @@ void Lexer::removeBlankspace()
 	for (size_t i = 0; i < codeFile.token.size(); ++i) {
 		if (codeFile.token.at(i) == "" or codeFile.token.at(i) == " ")
 			removeBlankspace();
-	}
+	}*/
 }
 
 void Lexer::readCode(std::ifstream fileName)
@@ -236,6 +245,11 @@ void Lexer::readCode(std::ifstream fileName)
 		int tabNum = 0;
 		for (size_t i = 0; i < line.length(); ++i) {
 			if (line.at(i) == '"' or line.at(i) == '\'') {
+				if (line.at(i + 1) == '"') {
+					tokenize("__EMPTY_STRING__");
+					i += 1;
+					continue;
+				}
 				if (isInString)
 					isInString = false;
 				else
