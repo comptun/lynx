@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
+extern std::vector<std::string> PCFnames;
 
 enum PCFid {
     PRINT,
@@ -37,6 +40,10 @@ enum PCFid {
     BOOLEXPR,
     IF_EXPR,
     WHILE_EXPR,
+    FIND,
+    SETPRECISION,
+    EXP,
+    SHA256,
 };
 
 enum booleanExpressions {

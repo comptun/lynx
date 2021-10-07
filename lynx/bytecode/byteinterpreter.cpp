@@ -82,12 +82,6 @@ size_t ByteInterpreter::getNameReference(std::string name)
 	return 404; // 404 not found
 }
 
-ByteInterpreter::Vector2D::Vector2D(int x, int y)
-{
-	this->x = x;
-	this->y = y;
-}
-
 void ByteInterpreter::interpret()
 {
 	for (instruction = 0; instruction < file.size(); instruction += 2) {
@@ -188,27 +182,60 @@ void ByteInterpreter::interpret()
 			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<double>(stack.at(stack.size() - 1));
 
-			else if (std::holds_alternative<std::string>(stack.at(stack.size() - 1)))
+			if (std::holds_alternative<std::string>(stack.at(stack.size() - 1)))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<std::string>(stack.at(stack.size() - 1));
 			
 			break;
 		case SUB:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<int>(stack.at(stack.size() - 1));
-			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<int>(stack.at(stack.size() - 1));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) - std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<double>(stack.at(stack.size() - 1));
+
 			break;
 		case MUL:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<int>(stack.at(stack.size() - 1));
-			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<int>(stack.at(stack.size() - 1));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) * std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<double>(stack.at(stack.size() - 1));
+
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2))))) {
+				std::string str = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+				std::string str2;
+				for (size_t n = 0; n < std::get<int>(stack.at(stack.size() - 1)); ++n) {
+					str2 = str2 + str;
+				}
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = str2;
+			}
+
 			break;
 		case DIV:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<int>(stack.at(stack.size() - 1));
-			else if (std::holds_alternative<double>(stack.at(stack.size() - 1)))
+
+			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<int>(stack.at(stack.size() - 1));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) / std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+
+			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
 				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<double>(stack.at(stack.size() - 1));
+
 			break;
 		case MOD:
 			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
@@ -233,22 +260,14 @@ void ByteInterpreter::interpret()
 			break;
 		}
 		case LOAD_ARRAY_REF:
-			stack.push_back(Vector2D(std::get<int>(stack.at(names.reference.at(getNameReference(std::get<int>(stack.at(stack.size() - 2))))))), std::get<int>(stack.back())));
+			
 			break;
 		case STORE_ARRAY: {
-			if (doesNameExist(stack.back())) {
-				names.reference.push_back(stack.size());
-				names.identifier.push_back(stack.back());
-				std::vector<std::variant<int, double, std::string>> newArray;
-				stack.push_back(newArray);
-			}
-			else {
-				stack.at(names.reference.at(getNameReference(std::get<int>(stack.at(stack.size() - 3))))).at(std::get<int>(stack.at(stack.size() - 2))) = stack.back();
-			}
+			
 			break;
 		}
 		case PUSH_ARRAY: {
-			stack.at(names.reference.at(getNameReference(std::get<int>(stack.at(stack.size() - 3))))).push_back(stack.back());
+			
 			break;
 		}
 		case POP_BACK:
@@ -259,12 +278,7 @@ void ByteInterpreter::interpret()
 			paramStack.back().erase(paramStack.back().begin());
 			break;
 		case STORE_PARAM:
-			if (std::holds_alternative<int>(stack.back()))
-				paramStack.back().push_back(std::get<int>(stack.back()));
-			else if (std::holds_alternative<double>(stack.back()))
-				paramStack.back().push_back(std::get<double>(stack.back()));
-			else if (std::holds_alternative<std::string>(stack.back()))
-				paramStack.back().push_back(std::get<std::string>(stack.back()));
+			paramStack.back().push_back(stack.back());
 			break;
 		case LOAD_VAR_PARAM:
 			stack.push_back(vargParamStack.back().at(0));
@@ -292,7 +306,7 @@ void ByteInterpreter::interpret()
 		case RETURN_VALUE:
 			instruction = secondaryInstruction.back();
 			secondaryInstruction.pop_back();
-			returnedValue = std::get<int>(stack.back());
+			returnedValue = stack.back();
 			break;
 		case LOAD_RETURN_VALUE:
 			stack.push_back(returnedValue);

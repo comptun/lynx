@@ -26,19 +26,14 @@ public:
 		std::vector<std::string> identifier;
 		std::vector<unsigned int> reference;
 	};
-	struct Vector2D {
-		int x;
-		int y;
-		Vector2D(int x, int y);
-	};
 
 	Names names;
 
-	std::variant<int, double, std::string, Vector2D, std::vector<std::variant<int, double, std::string, Vector2D>>> returnedValue;
+	std::variant<int, double, std::string> returnedValue;
 	
-	std::vector<std::variant<int, double, std::string, Vector2D, std::vector<std::variant<int, double, std::string, Vector2D>>>> stack;
+	std::vector<std::variant<int, double, std::string>> stack;
 	//std::vector<int> stack;
-	std::vector<std::vector<std::variant<int, double, std::string, Vector2D, std::vector<std::variant<int, double, std::string, Vector2D>>>>> paramStack;
+	std::vector<std::vector<std::variant<int, double, std::string>>> paramStack;
 	std::vector<std::vector<int>> vargParamStack;
 
 	void executePCF(std::string funcName);

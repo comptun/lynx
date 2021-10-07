@@ -1,5 +1,6 @@
 #include "pcfunctions.h"
 #include "byteinterpreter.h"
+#include "sha256.h"
 
 #include <vector>
 #include <math.h>
@@ -41,6 +42,10 @@ std::vector<std::string> PCFnames = {
     "boolexpr",
     "if",
     "while",
+    "find",
+    "setprecision",
+    "exp",
+    "sha256",
 };
 
 void ByteInterpreter::executePCF(std::string funcName)
@@ -121,7 +126,7 @@ void ByteInterpreter::executePCF(std::string funcName)
         if (std::holds_alternative<int>(paramStack.back().at(0)))
             returnedValue = pow(std::get<int>(paramStack.back().at(0)), std::get<int>(paramStack.back().at(1)));
         else if (std::holds_alternative<double>(paramStack.back().at(0)))
-            returnedValue = pow(std::get<int>(paramStack.back().at(0)), std::get<int>(paramStack.back().at(1)));
+            returnedValue = pow(std::get<double>(paramStack.back().at(0)), std::get<double>(paramStack.back().at(1)));
         break;
     case PUTC:
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
@@ -213,6 +218,13 @@ void ByteInterpreter::executePCF(std::string funcName)
             sqrtNum = sqrt(std::get<int>(paramStack.back().at(0)));
         else if (std::holds_alternative<double>(paramStack.back().at(0)))
             sqrtNum = sqrt(std::get<double>(paramStack.back().at(0)));
+        if (std::get<int>(paramStack.back().at(0)) == 0
+            or std::get<int>(paramStack.back().at(0)) == 1
+            or std::get<int>(paramStack.back().at(0)) == 4
+            or std::get<int>(paramStack.back().at(0)) == 9) {
+            returnedValue = false;
+            break;
+        }
         for (int a = 2; a < sqrtNum; ++a) {
             if (std::get<int>(paramStack.back().at(0)) % a == 0) {
                 isPrime = false;
@@ -337,6 +349,20 @@ void ByteInterpreter::executePCF(std::string funcName)
                     }
                     firstRound.push_back(false);
                     break;
+                case GREATER_THAN_EXPR:
+                    if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
+                case LESS_THAN_EXPR:
+                    if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
+                        firstRound.push_back(true);
+                        break;
+                    }
+                    firstRound.push_back(false);
+                    break;
                 }
                 if (j + 3 < paramStack.back().size() - 1) {
                     firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
@@ -388,210 +414,8 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = paramStack.back().at(0);
         break;
     }
-    /*case CEIL:
-        returnedValue = ceil(std::get<float>(paramStack.back().at(0)));
-        break;
-    case FLOOR:
-        returnedValue = floor(std::get<float>(paramStack.back().at(0)));
-        break;
-    case ABS:
-        if (std::holds_alternative<int>(paramStack.back().at(0))) {
-            returnedValue = abs(std::get<float>(paramStack.back().at(0)));
-        }
-        else if (std::holds_alternative<float>(paramStack.back().at(0))) {
-            returnedValue = fabs(std::get<float>(paramStack.back().at(0)));
-        }
-        break;*/
-    case BOOLEXPR: {
-        std::vector<int> firstRound;
-        std::vector<int> secondRound;
-        for (size_t j = 0; j < paramStack.back().size();) {
-            switch (std::get<int>(paramStack.back().at(j + 1))) {
-            case EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) == paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case NOT_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) != paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case GREATER_THAN_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) >= paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case LESS_THAN_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) <= paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case GREATER_THAN_EXPR:
-                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case LESS_THAN_EXPR:
-                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            }
-            if (j + 3 < paramStack.back().size() - 1) {
-                firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
-                j += 4;
-                continue;
-            }
-            j += 3;
-        }
-        if (firstRound.size() > 1) {
-            for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
-                switch (firstRound.at(j + 1)) {
-                case AND_EXPR:
-                    if (firstRound.at(j) and firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                case OR_EXPR:
-                    if (firstRound.at(j) or firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                case XOR_EXPR:
-                    if (firstRound.at(j) xor firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                }
-            }
-        }
-        else {
-            secondRound.push_back(firstRound.at(0));
-        }
-        for (size_t j = 0; j < secondRound.size(); j += 1) {
-            if (secondRound.at(j) == false) {
-                returnedValue = false;
-                paramStack.pop_back();
-                return;
-            }
-        }
-        returnedValue = true;
-        break;
-    }
-    case IF_EXPR: {
-        std::vector<int> firstRound;
-        std::vector<int> secondRound;
-        for (size_t j = 0; j < paramStack.back().size();) {
-            switch (std::get<int>(paramStack.back().at(j + 1))) {
-            case EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) == paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case NOT_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) != paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case GREATER_THAN_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) >= paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case LESS_THAN_EQUAL_TO_EXPR:
-                if (paramStack.back().at(j) <= paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case GREATER_THAN_EXPR:
-                if (paramStack.back().at(j) > paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            case LESS_THAN_EXPR:
-                if (paramStack.back().at(j) < paramStack.back().at(j + 2)) {
-                    firstRound.push_back(true);
-                    break;
-                }
-                firstRound.push_back(false);
-                break;
-            }
-            if (j + 3 < paramStack.back().size() - 1) {
-                firstRound.push_back(std::get<int>(paramStack.back().at(j + 3)));
-                j += 4;
-                continue;
-            }
-            j += 3;
-        }
-        if (firstRound.size() > 1) {
-            for (size_t j = 0; j < firstRound.size() - 1; j += 2) {
-                switch (firstRound.at(j + 1)) {
-                case AND_EXPR:
-                    if (firstRound.at(j) and firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                case OR_EXPR:
-                    if (firstRound.at(j) or firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                case XOR_EXPR:
-                    if (firstRound.at(j) xor firstRound.at(j + 2)) {
-                        secondRound.push_back(true);
-                        break;
-                    }
-                    secondRound.push_back(false);
-                    break;
-                }
-            }                   
-        }
-        else {
-            secondRound.push_back(firstRound.at(0));
-        }
-        for (size_t j = 0; j < secondRound.size(); j += 1) {
-            if (secondRound.at(j) == false) {
-                returnedValue = false;
-                paramStack.pop_back();
-                return;
-            }
-        }
-        returnedValue = true;
-        break;
-    }
+    case BOOLEXPR:
+    case IF_EXPR:
     case WHILE_EXPR: {
         std::vector<int> firstRound;
         std::vector<int> secondRound;
@@ -687,6 +511,55 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = true;
         break;
     }
+    case FIND: {
+        bool found = false;
+        if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
+            for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(1)).size(); ++j) {
+                if (std::get<std::string>(paramStack.back().at(1)).at(j) == std::get<std::string>(paramStack.back().at(0)).at(0)) {
+                    returnedValue = static_cast<int>(j);
+                    found = true;
+                    break;
+                }
+            }
+        }
+        else if (std::holds_alternative<int>(paramStack.back().at(0))) {
+            for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(1)).size(); ++j) {
+                if (std::get<std::string>(paramStack.back().at(1)).at(j) == static_cast<char>(std::get<int>(paramStack.back().at(0)))) {
+                    returnedValue = static_cast<int>(j);
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (found == false)
+            returnedValue = -1;
+        break;
+    }
+    case SETPRECISION:
+        std::cout << std::setprecision(std::get<int>(paramStack.back().at(0)));
+        returnedValue = 0;
+        break;
+    case EXP:
+        if (std::holds_alternative<int>(paramStack.back().at(0)))
+            returnedValue = exp(std::get<int>(paramStack.back().at(0)));
+        else if (std::holds_alternative<double>(paramStack.back().at(0)))
+            returnedValue = exp(std::get<double>(paramStack.back().at(0)));
+        break;
+    case SHA256:
+        if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
+            returnedValue = sha256(std::get<std::string>(paramStack.back().at(0)));
+            break;
+        }
+        else if (std::holds_alternative<int>(paramStack.back().at(0))) {
+            returnedValue = sha256(std::to_string(std::get<int>(paramStack.back().at(0))));
+            break;
+        }
+        else if (std::holds_alternative<double>(paramStack.back().at(0))) {
+            returnedValue = sha256(std::to_string(std::get<double>(paramStack.back().at(0))));
+            break;
+        }
+        returnedValue = -1;
+        break;
     }
     /*stack.push_back(returnedValue);
     stack.push_back(static_cast<int>(stack.size() - 1));*/

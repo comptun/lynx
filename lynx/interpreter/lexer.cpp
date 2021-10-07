@@ -140,7 +140,7 @@ void Lexer::tokenize(std::string token)
 			return;
 		}
 		if (token == "__EMPTY_STRING__") {
-			codeFile.token.push_back(std::string(1,0));
+			codeFile.token.push_back(" ");
 			codeFile.type.push_back("CONSTANT_VALUE");
 			return;
 		}
@@ -173,7 +173,7 @@ void Lexer::tokenize(std::string token)
 
 void Lexer::retokenize(std::string token, size_t pos)
 {
-	for (size_t i = 0; i < tokenNames.size(); ++i) {
+	/*for (size_t i = 0; i < tokenNames.size(); ++i) {
 		if (tokenNames.at(i) == token) {
 			codeFile.type.at(pos) = tokenTypes.at(i);
 			return;
@@ -183,7 +183,50 @@ void Lexer::retokenize(std::string token, size_t pos)
 		codeFile.type.at(pos) = "CONSTANT_VALUE";
 		return;
 	}
-	codeFile.type.at(pos) = "NAME";
+	codeFile.type.at(pos) = "NAME";*/
+
+
+	if (token != "" && token != " ") {
+		if (token == "("
+			and (codeFile.type.at(pos - 1) != "NAME"
+				and codeFile.type.at(pos - 1) != "IF_STATEMENT"
+				and codeFile.type.at(pos - 1) != "WHILE_LOOP")) {
+			codeFile.token.at(pos) = "parenthesis";
+			codeFile.type.at(pos) = "NAME";
+			codeFile.token.at(pos) = "(";
+			codeFile.type.at(pos) = "LBRACKET";
+			return;
+		}
+		if (token == "__EMPTY_STRING__") {
+			codeFile.token.at(pos) = " ";
+			codeFile.type.at(pos) = "CONSTANT_VALUE";
+			return;
+		}
+		codeFile.token.at(pos) = token;
+		for (size_t i = 0; i < tokenNames.size(); ++i) {
+			if (tokenNames.at(i) == token) {
+				codeFile.type.at(pos) = tokenTypes.at(i);
+				return;
+			}
+		}
+		if (token.at(0) == '\'') {
+			codeFile.token.at(pos - 1) = std::to_string(static_cast<int>(codeFile.token.at(pos - 1).at(1)));
+			codeFile.type.at(pos) = "CONSTANT_VALUE";
+			return;
+		}
+		if (token.at(0) == '"') {
+			size_t offset = codeFile.token.at(pos - 1).size() - 2;
+			codeFile.token.at(pos - 1).erase(codeFile.token.at(pos - 1).begin());
+			codeFile.token.at(pos - 1).erase(offset);
+			codeFile.type.at(pos) = "CONSTANT_VALUE";
+			return;
+		}
+		if (isInteger(token) or isFloat(token)) {
+			codeFile.type.at(pos) = "CONSTANT_VALUE";
+			return;
+		}
+		codeFile.type.at(pos) = "NAME";
+	}
 }
 
 bool Lexer::isWhitespace(char character)

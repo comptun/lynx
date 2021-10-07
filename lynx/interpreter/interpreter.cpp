@@ -26,9 +26,11 @@ void Interpreter::preprocess()
 	define("true", "1");
 	define("false", "0");
 	define("NULL", "0");
+	define("M_PI", "3.141592653589793115997963468544185161590576171875");
+	define("M_E", "2.718281828459045090795598298427648842334747314453");
 	for (size_t i = 0; i < codeFile.token.size();) {
 		for (size_t j = 0; j < definitions.placeholder.size(); ++j) {
-			if (codeFile.token.at(i) == definitions.placeholder.at(j)) {
+			if (codeFile.token.at(i) == definitions.placeholder.at(j) and codeFile.type.at(i) != "CONSTANT_VALUE") {
 				codeFile.token.at(i) = definitions.instruction.at(j);
 				retokenize(codeFile.token.at(i), i);
 				break;
@@ -289,6 +291,7 @@ void Interpreter::translate()
 				instruction += 3;
 			}
 			if (codeFile.token.at(instruction) == ")") {
+				bytecode("POP_PARAM_STACK", "0");
 				++instruction;
 				isInFunctionDefinition = false;
 			}
@@ -314,7 +317,7 @@ void Interpreter::translate()
 					bytecode("POP_BACK", "0");
 				}
 				bytecode("CALL", functionName.back());
-				if (functionName.size() > 1 or isInNameAssignment) {
+				if (functionName.size() > 1 or isInNameAssignment or isInReturnStatement) {
 					bytecode("LOAD_RETURN_VALUE", "0");
 					bytecode("LOAD_BACK_REF", "0");
 					if (functionOperatorType.back() != "NULL") {
@@ -477,7 +480,7 @@ void Interpreter::translate()
 			}*/
 			break;
 		case NAME:
-			if (isInReturnStatement) {
+			if (isInReturnStatement and codeFile.token.at(instruction + 1) != "(") {
 				bytecode("LOAD_NAME", codeFile.token.at(instruction));
 				bytecode("LOAD_BACK_REF", "0");
 				instruction += 1;
@@ -490,6 +493,14 @@ void Interpreter::translate()
 					bytecode("RETURN_VALUE", "0");
 					isInReturnStatement = false;
 				}
+				break;
+			}
+			else if (isInReturnStatement and codeFile.token.at(instruction + 1) == "(") {
+				bytecode("NEW_PARAM_STACK", "0");
+				functionName.push_back(codeFile.token.at(instruction));
+				functionOperatorType.push_back("NULL");
+				++functionDepth;
+				instruction += 2;
 				break;
 			}
 			/*if (codeFile.token.at(instruction + 1) == "(" and codeFile.token.at(instruction + 2) == ")") {
@@ -564,7 +575,7 @@ void Interpreter::translate()
 						functionName.push_back(codeFile.token.at(instruction + 2));
 						++functionDepth;
 						functionOperatorType.push_back("NULL");
-						currentName = codeFile.token.at(instruction);
+						currentName.push_back(codeFile.token.at(instruction));
 						isInNameAssignment = true;
 						instruction += 4;
 						break;
@@ -583,7 +594,7 @@ void Interpreter::translate()
 					bytecode("STORE_NAME", codeFile.token.at(instruction));
 				}
 				else {
-					currentName = codeFile.token.at(instruction);
+					currentName.push_back(codeFile.token.at(instruction));
 					bytecode("LOAD_BACK_REF", "0");
 					isInNameAssignment = true;
 				}
@@ -636,7 +647,6 @@ void Interpreter::translate()
 			switch (statementType.back()) {
 			case ELIF_STATEMENT:
 				for (size_t e = 0; e < nameScope.back(); ++e) {
-					knownNames.pop_back();
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
@@ -654,7 +664,6 @@ void Interpreter::translate()
 				break;
 			case ELSE_STATEMENT:
 				for (size_t e = 0; e < nameScope.back(); ++e) {
-					knownNames.pop_back();
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
@@ -664,7 +673,6 @@ void Interpreter::translate()
 				break;
 			case IF_STATEMENT:
 				for (size_t e = 0; e < nameScope.back(); ++e) {
-					knownNames.pop_back();
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
@@ -690,7 +698,6 @@ void Interpreter::translate()
 				bytecode("JUMP", std::to_string(jumpInstruction.back().at(0)));
 				jumpInstruction.pop_back();
 				for (size_t e = 0; e < nameScope.back(); ++e) {
-					knownNames.pop_back();
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
@@ -698,7 +705,6 @@ void Interpreter::translate()
 				break;
 			case FUNCTION_STATEMENT:
 				for (size_t e = 0; e < nameScope.back(); ++e) {
-					knownNames.pop_back();
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
@@ -750,7 +756,8 @@ void Interpreter::translate()
 		case SEMI_COLON:
 			if (isInNameAssignment) {
 				bytecode("POP_BACK", "0");
-				bytecode("STORE_NAME", currentName);
+				bytecode("STORE_NAME", currentName.back());
+				currentName.pop_back();
 				isInNameAssignment = false;
 				break;
 			}
