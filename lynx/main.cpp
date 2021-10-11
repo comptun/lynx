@@ -24,22 +24,21 @@ int main()
 	}*/
 
 	//lynx.translate();
-
 	lynx.translate();
 	lynx.interpret();
-	if (std::get<int>(lynx.stack.at(lynx.names.reference.at(lynx.getNameReference("__BYTECODE__")))) == true) {
+	if (std::get<long long int>(lynx.stack.at(lynx.names.reference.at(lynx.getNameReference("__BYTECODE__")))) == true) {
 		std::cout << "\nCOMPILED BYTECODE:\n";
-		for (size_t i = 0; i < file.size(); i += 2) {
-			std::cout << i << " " << file.at(i) << " " << file.at(i + 1) << std::endl;
+		for (size_t i = 0; i < bcfile.file.size(); i += 2) {
+			std::cout << i << " " << bcfile.file.at(i) << " " << bcfile.file.at(i + 1) << std::endl;
 		}
 	}
 
 	/*std::cout << "Stack: ";
 	for (size_t i = 0; i < lynx.stack.size(); ++i) {
-		if (std::holds_alternative<int>(lynx.stack.at(i)))
-			std::cout << std::get<int>(lynx.stack.at(i)) << " ";
-		if (std::holds_alternative<double>(lynx.stack.at(i)))
-			std::cout << std::get<double>(lynx.stack.at(i)) << " ";
+		if (std::holds_alternative<long long int>(lynx.stack.at(i)))
+			std::cout << std::get<long long int>(lynx.stack.at(i)) << " ";
+		if (std::holds_alternative<long double>(lynx.stack.at(i)))
+			std::cout << std::get<long double>(lynx.stack.at(i)) << " ";
 		if (std::holds_alternative<std::string>(lynx.stack.at(i)))
 			std::cout << "\"" << std::get<std::string>(lynx.stack.at(i)) << "\" ";
 	}*/

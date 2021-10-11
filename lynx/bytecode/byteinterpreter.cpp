@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-std::vector<std::string> file;
+BCfile bcfile;
 
 bool ByteInterpreter::isInteger(std::string num)
 {
@@ -21,7 +21,7 @@ bool ByteInterpreter::isInteger(std::string num)
 
 bool ByteInterpreter::isFloat(std::string num)
 {
-	unsigned int decimalCount = 0;
+	unsigned long long int decimalCount = 0;
 	for (size_t i = 0; i < num.size(); ++i) {
 		if (!isdigit(num.at(i)) and num.at(i) != '.' or (num.at(i) == '.' and decimalCount > 0))
 			return false;
@@ -43,19 +43,19 @@ void ByteInterpreter::readFile(std::ifstream fileName)
 			if (line.at(i) == '"') {
 				for (++i; line.at(i) != '"'; ++i) {
 					lineContent += line.at(i);
-					file.push_back(lineContent);
+					bcfile.file.push_back(lineContent);
 					lineContent.clear();
 				}
 				break;
 			}
 			if (i == line.length() - 1) {
 				lineContent += line.at(i);
-				file.push_back(lineContent);
+				bcfile.file.push_back(lineContent);
 				lineContent.clear();
 				continue;
 			}
 			if (isWhitespace(line.at(i))) {
-				file.push_back(lineContent);
+				bcfile.file.push_back(lineContent);
 				lineContent.clear();
 				continue;
 			}
@@ -84,57 +84,57 @@ size_t ByteInterpreter::getNameReference(std::string name)
 
 void ByteInterpreter::interpret()
 {
-	for (instruction = 0; instruction < file.size(); instruction += 2) {
-		switch (getOpcode(file.at(instruction))) {
+	for (instruction = 0; instruction < bcfile.file.size(); instruction += 2) {
+		switch (getOpcode(bcfile.file.at(instruction))) {
 		case LOAD_CONST:
-			if (isInteger(file.at(instruction + 1)))
-				stack.push_back(std::stoi(file.at(instruction + 1)));
-			else if (isFloat(file.at(instruction + 1)))
-				stack.push_back(std::stod(file.at(instruction + 1)));
+			if (isInteger(bcfile.file.at(instruction + 1)))
+				stack.push_back(std::stoi(bcfile.file.at(instruction + 1)));
+			else if (isFloat(bcfile.file.at(instruction + 1)))
+				stack.push_back(std::stod(bcfile.file.at(instruction + 1)));
 			else
-			 	stack.push_back(file.at(instruction + 1));
+			 	stack.push_back(bcfile.file.at(instruction + 1));
 			break;
 		case LOAD_REF:
-			stack.push_back(static_cast<int>(getNameReference(file.at(instruction + 1))));
+			stack.push_back(static_cast<long long int>(getNameReference(bcfile.file.at(instruction + 1))));
 			break;
 		case STORE_REF:
-			//names.reference.at(getNameReference(file.at(instruction + 1))) = stack.back();
+			//names.reference.at(getNameReference(bcfile.file.at(instruction + 1))) = stack.back();
 			break;
 		case LOAD_NAME:
-			stack.push_back(stack.at(getNameReference(file.at(instruction + 1))));
+			stack.push_back(stack.at(getNameReference(bcfile.file.at(instruction + 1))));
 			break;
 		case STORE_NAME:
-			if (doesNameExist(file.at(instruction + 1)) == false) {
-				names.identifier.push_back(file.at(instruction + 1));
+			if (doesNameExist(bcfile.file.at(instruction + 1)) == false) {
+				names.identifier.push_back(bcfile.file.at(instruction + 1));
 				names.reference.push_back(stack.size() - 1);
 			}
 			else {
-				stack.at(getNameReference(file.at(instruction + 1))) = stack.back();
+				stack.at(getNameReference(bcfile.file.at(instruction + 1))) = stack.back();
 			}
 			break;
 		case COMPARE:
 			conditional = false;
-			if (file.at(instruction + 1) == "==") {
+			if (bcfile.file.at(instruction + 1) == "==") {
 				if (stack.at(stack.size() - 2) == stack.back())
 					conditional = true;
 			}
-			if (file.at(instruction + 1) == "!=") {
+			if (bcfile.file.at(instruction + 1) == "!=") {
 				if (stack.at(stack.size() - 2) != stack.back())
 					conditional = true;
 			}
-			if (file.at(instruction + 1) == ">=") {
+			if (bcfile.file.at(instruction + 1) == ">=") {
 				if (stack.at(stack.size() - 2) >= stack.back())
 					conditional = true;
 			}
-			if (file.at(instruction + 1) == "<=") {
+			if (bcfile.file.at(instruction + 1) == "<=") {
 				if (stack.at(stack.size() - 2) <= stack.back())
 					conditional = true;
 			}
-			if (file.at(instruction + 1) == ">") {
+			if (bcfile.file.at(instruction + 1) == ">") {
 				if (stack.at(stack.size() - 2) > stack.back())
 					conditional = true;
 			}
-			if (file.at(instruction + 1) == "<") {
+			if (bcfile.file.at(instruction + 1) == "<") {
 				if (stack.at(stack.size() - 2) < stack.back())
 					conditional = true;
 			}
@@ -143,109 +143,109 @@ void ByteInterpreter::interpret()
 			break;
 		case JUMP_IF_FALSE:
 			if (conditional == false)
-				instruction = std::stoi(file.at(instruction + 1));
+				instruction = std::stoi(bcfile.file.at(instruction + 1));
 			break;
 		case JUMP_IF_TRUE:
 			if (conditional == true)
-				instruction = std::stoi(file.at(instruction + 1));
+				instruction = std::stoi(bcfile.file.at(instruction + 1));
 			break;
 		case JUMP:
-			if (isInteger(file.at(instruction + 1)))
-				instruction = std::stoi(file.at(instruction + 1));
+			if (isInteger(bcfile.file.at(instruction + 1)))
+				instruction = std::stoi(bcfile.file.at(instruction + 1));
 			else
-				instruction = std::get<int>(stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))));
+				instruction = std::get<long long int>(stack.at(names.reference.at(getNameReference(bcfile.file.at(instruction + 1)))));
 			break;
 		case CALL:
-			if (doesNameExist(file.at(instruction + 1)) == false) {
-				executePCF(file.at(instruction + 1));
+			if (doesNameExist(bcfile.file.at(instruction + 1)) == false) {
+				executePCF(bcfile.file.at(instruction + 1));
 			}
-			if (doesNameExist(file.at(instruction + 1)) == true) {
+			if (doesNameExist(bcfile.file.at(instruction + 1)) == true) {
 				secondaryInstruction.push_back(instruction);
-				instruction = std::get<int>(stack.at(getNameReference(file.at(instruction + 1))));
-				/*for (size_t e = 0; e < file.size(); e += 2) {
-					if (file.at(e) == "START_FUNCTION" and file.at(e + 1) == file.at(instruction + 1)) {
+				instruction = std::get<long long int>(stack.at(getNameReference(bcfile.file.at(instruction + 1))));
+				/*for (size_t e = 0; e < bcfile.file.size(); e += 2) {
+					if (bcfile.file.at(e) == "START_FUNCTION" and bcfile.file.at(e + 1) == bcfile.file.at(instruction + 1)) {
 						instruction = e;
 					}
 				}*/
 			}
 			break;
 		case ADD:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) + std::get<long long int>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) + static_cast<long double>(std::get<long long int>(stack.at(stack.size() - 1)));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) + std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = (std::get<long double>(stack.at(stack.size() - 1))) + static_cast<long double>(std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<double>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) + std::get<long double>(stack.at(stack.size() - 1));
 
 			if (std::holds_alternative<std::string>(stack.at(stack.size() - 1)))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) + std::get<std::string>(stack.at(stack.size() - 1));
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<std::string>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) + std::get<std::string>(stack.at(stack.size() - 1));
 			
 			break;
 		case SUB:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) - std::get<long long int>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) - static_cast<long double>(std::get<long long int>(stack.at(stack.size() - 1)));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) - std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(stack.size() - 1)) - static_cast<long double>(std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) - std::get<double>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) - std::get<long double>(stack.at(stack.size() - 1));
 
 			break;
 		case MUL:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) * std::get<long long int>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) * static_cast<long double>(std::get<long long int>(stack.at(stack.size() - 1)));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) * std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = (std::get<long double>(stack.at(stack.size() - 1))) * static_cast<long double>(std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) * std::get<double>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) * std::get<long double>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2))))) {
-				std::string str = std::get<std::string>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<std::string>(stack.at(std::get<long long int>(stack.at(stack.size() - 2))))) {
+				std::string str = std::get<std::string>(stack.at(std::get<long long int>(stack.at(stack.size() - 2))));
 				std::string str2;
-				for (size_t n = 0; n < std::get<int>(stack.at(stack.size() - 1)); ++n) {
+				for (size_t n = 0; n < std::get<long long int>(stack.at(stack.size() - 1)); ++n) {
 					str2 = str2 + str;
 				}
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = str2;
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = str2;
 			}
 
 			break;
 		case DIV:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) / std::get<long long int>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) / std::get<long long int>(stack.at(stack.size() - 1));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = (std::get<double>(stack.at(stack.size() - 1))) / std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2))));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = (std::get<long double>(stack.at(stack.size() - 1))) / std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2))));
 
-			if (std::holds_alternative<double>(stack.at(stack.size() - 1)) and std::holds_alternative<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<double>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) / std::get<double>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long double>(stack.at(stack.size() - 1)) and std::holds_alternative<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long double>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) / std::get<long double>(stack.at(stack.size() - 1));
 
 			break;
 		case MOD:
-			if (std::holds_alternative<int>(stack.at(stack.size() - 1)))
-				stack.at(std::get<int>(stack.at(stack.size() - 2))) = std::get<int>(stack.at(std::get<int>(stack.at(stack.size() - 2)))) % std::get<int>(stack.at(stack.size() - 1));
+			if (std::holds_alternative<long long int>(stack.at(stack.size() - 1)))
+				stack.at(std::get<long long int>(stack.at(stack.size() - 2))) = std::get<long long int>(stack.at(std::get<long long int>(stack.at(stack.size() - 2)))) % std::get<long long int>(stack.at(stack.size() - 1));
 			break;
 		case START_FUNCTION:
-			names.identifier.push_back(file.at(instruction + 1));
+			names.identifier.push_back(bcfile.file.at(instruction + 1));
 			names.reference.push_back(stack.size());
-			stack.push_back(static_cast<int>(instruction));
-			for (; file.at(instruction) != "END_FUNCTION"; instruction += 2);
+			stack.push_back(static_cast<long long int>(instruction));
+			for (; bcfile.file.at(instruction) != "END_FUNCTION"; instruction += 2);
 			break;
 		case END_FUNCTION:
 			instruction = secondaryInstruction.back();
@@ -288,9 +288,9 @@ void ByteInterpreter::interpret()
 
 			break;
 		case DELETE:
-			stack.at(names.reference.at(getNameReference(file.at(instruction + 1)))) = 0;
-			names.reference.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
-			names.identifier.at(getNameReference(file.at(instruction + 1))) = getNameReference(file.at(instruction + 1));
+			stack.at(names.reference.at(getNameReference(bcfile.file.at(instruction + 1)))) = 0;
+			names.reference.at(getNameReference(bcfile.file.at(instruction + 1))) = getNameReference(bcfile.file.at(instruction + 1));
+			names.identifier.at(getNameReference(bcfile.file.at(instruction + 1))) = getNameReference(bcfile.file.at(instruction + 1));
 			break;
 		case POP_NAME:
 			/*stack.erase(stack.begin() + names.reference.back());
@@ -301,7 +301,7 @@ void ByteInterpreter::interpret()
 
 			break;
 		case LOAD_BACK_REF:
-			stack.push_back(static_cast<int>(stack.size() - 1));
+			stack.push_back(static_cast<long long int>(stack.size() - 1));
 			break;
 		case RETURN_VALUE:
 			instruction = secondaryInstruction.back();
@@ -312,7 +312,7 @@ void ByteInterpreter::interpret()
 			stack.push_back(returnedValue);
 			break;
 		case NEW_PARAM_STACK: {
-			std::vector<std::variant<int, double, std::string>> newParamStack;
+			std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>> newParamStack;
 			paramStack.push_back(newParamStack);
 			break;
 		}

@@ -39,7 +39,6 @@ std::vector<std::string> tokenNames = {
 	"/",
 	"%",
 	"define",
-	"import",
 	",",
 	".",
 	"jump",
@@ -50,6 +49,7 @@ std::vector<std::string> tokenNames = {
 	"return",
 	"&",
 	";",
+	"import",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -90,7 +90,6 @@ std::vector<std::string> tokenTypes = {
 	"DIVIDE",
 	"MODULUS",
 	"DEFINE",
-	"IMPORT",
 	"COMMA",
 	"PERIOD",
 	"JUMP",
@@ -101,6 +100,7 @@ std::vector<std::string> tokenTypes = {
 	"RETURN",
 	"AMPERSAND",
 	"SEMI_COLON",
+	"IMPORT",
 };
 
 bool Lexer::isFloat(std::string num)
@@ -126,7 +126,7 @@ bool Lexer::isInteger(std::string num)
 	return true;
 }
 
-void Lexer::tokenize(std::string token)
+void Lexer::tokenize(std::string token) 
 {
 	if (token != "" && token != " ") {
 		if (token == "(" 
@@ -168,6 +168,38 @@ void Lexer::tokenize(std::string token)
 			return;
 		}
 		codeFile.type.push_back("NAME");
+	}
+}
+
+std::string Lexer::getImportType(std::string token)
+{
+	if (token != "" && token != " ") {
+		if (token == "("
+			and (codeFile.type.back() != "NAME"
+				and codeFile.type.back() != "IF_STATEMENT"
+				and codeFile.type.back() != "WHILE_LOOP")) {
+			return "LBRACKET";
+		}
+		if (token == "__EMPTY_STRING__") {
+			return "CONSTANT_VALUE";
+		}
+		codeFile.token.push_back(token);
+		for (size_t i = 0; i < tokenNames.size(); ++i) {
+			if (tokenNames.at(i) == token) {
+				return tokenTypes.at(i);
+			}
+		}
+		if (token.at(0) == '\'') {
+			return "CONSTANT_VALUE";
+		}
+		if (token.at(0) == '"') {
+			size_t offset = codeFile.token.back().size() - 2;
+			return "CONSTANT_VALUE";
+		}
+		if (isInteger(token) or isFloat(token)) {
+			return "CONSTANT_VALUE";
+		}
+		return "NAME";
 	}
 }
 
@@ -266,7 +298,11 @@ bool Lexer::special2Character(std::string characters)
 		or characters == "&&"
 		or characters == "||"
 		or characters == "++"
-		or characters == "--";
+		or characters == "--"
+		or characters == "+="
+		or characters == "-="
+		or characters == "*="
+		or characters == "/=";
 }
 
 void Lexer::removeBlankspace()
@@ -311,18 +347,27 @@ void Lexer::readCode(std::ifstream fileName)
 					++tabNum;
 					continue;
 				}
-				/*if (special2Character(line.at(i), line.at(i + 1))) {
-					tokenize(lineContent);
-					lineContent.clear();
-					tokenize(std::string(1, line.at(i)) += std::string(1, line.at(i + 1)));
-					++i;
-					continue;
-				}*/
 				if (i < line.length() - 1) {
 					if (special2Character(std::string(1, line.at(i)) + line.at(i + 1))) {
 						tokenize(lineContent);
 						lineContent.clear();
-						tokenize(std::string(1, line.at(i)) + line.at(i + 1));
+						std::string character2 = std::string(1, line.at(i)) + line.at(i + 1);
+						if (character2 == "+="
+							or character2 == "-="
+							or character2 == "/="
+							or character2 == "*="
+							or character2 == "%="
+							or character2 == "++"
+							or character2 == "--") {
+							tokenize("=");
+							tokenize(codeFile.token.at(codeFile.token.size() - 2));
+							tokenize(std::string(1, line.at(i)));
+							if (character2 == "++" or character2 == "--")
+								tokenize("1");
+						}
+						else {
+							tokenize(character2);
+						}
 						i += 1;
 						continue;
 					}
@@ -351,5 +396,65 @@ void Lexer::readCode(std::ifstream fileName)
 		}
 	}
 	fileName.close();
+	/*for (size_t j = 0; j < codeFile.token.size(); ++j) {
+		if (codeFile.type.at(j) == "IMPORT") {
+			lineContent.clear();
+			line.clear();
+			std::ifstream importFilename(codeFile.token.at(j + 1));
+			while (getline(importFilename, line)) {
+				for (size_t i = 0; i < line.length(); ++i) {
+					if (line.at(i) == '"' or line.at(i) == '\'') {
+						if (line.at(i + 1) == '"') {
+							codeFile.token.insert(codeFile.token.begin() + j + 2, lineContent);
+							codeFile.type.insert(codeFile.type.begin() + j + 2, getImportType(lineContent));
+							i += 1;
+							continue;
+						}
+						if (isInString)
+							isInString = false;
+						else
+							isInString = true;
+					}
+					if (!isInString) {
+						if (line.at(i) == '/' and line.at(i + 1) == '/') {
+							break;
+						}
+						if (i < line.length() - 1) {
+							if (special2Character(std::string(1, line.at(i)) + line.at(i + 1))) {
+								tokenize(lineContent);
+								lineContent.clear();
+								codeFile.token.insert(codeFile.token.begin() + j + 2, std::string(1, line.at(i)) + line.at(i + 1));
+								codeFile.type.insert(codeFile.type.begin() + j + 2, getImportType(std::string(1, line.at(i)) + line.at(i + 1)));
+								i += 1;
+								continue;
+							}
+						}
+						if (special1Character(line.at(i))) {
+							tokenize(lineContent);
+							lineContent.clear();
+							codeFile.token.insert(codeFile.token.begin() + j + 2, std::string(1, line.at(i)));
+							codeFile.type.insert(codeFile.type.begin() + j + 2, getImportType(std::string(1, line.at(i))));
+							continue;
+						}
+						if (i == line.length() - 1) {
+							lineContent += line.at(i);
+							codeFile.token.insert(codeFile.token.begin() + j + 2, lineContent);
+							codeFile.type.insert(codeFile.type.begin() + j + 2, getImportType(lineContent));
+							lineContent.clear();
+							continue;
+						}
+						if (isWhitespace(line.at(i))) {
+							codeFile.token.insert(codeFile.token.begin() + j + 2, lineContent);
+							codeFile.type.insert(codeFile.type.begin() + j + 2, getImportType(lineContent));
+							lineContent.clear();
+							continue;
+						}
+					}
+					lineContent += line.at(i);
+				}
+			}
+			importFilename.close();
+		}
+	}*/
 	//removeBlankspace();
 }

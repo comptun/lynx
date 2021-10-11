@@ -45,7 +45,6 @@ enum tokenEnum {
 	DIVIDE,
 	MODULUS,
 	DEFINE,
-	IMPORT,
 	COMMA,
 	PERIOD,
 	JUMP_TO,
@@ -56,6 +55,7 @@ enum tokenEnum {
 	RETURN,
 	AMPERSAND,
 	SEMI_COLON,
+	IMPORT,
 };
 
 class Lexer {
@@ -66,6 +66,7 @@ public:
 		std::vector<int> indents;
 	};
 	File codeFile;
+	std::string getImportType(std::string token);
 	void removeBlankspace();
 	bool isFloat(std::string num);
 	bool isInteger(std::string num);

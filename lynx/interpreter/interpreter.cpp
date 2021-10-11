@@ -54,9 +54,9 @@ void Interpreter::preprocess()
 
 void Interpreter::bytecode(std::string instruction, std::string param)
 {
-	//std::cout << file.size() << " " << instruction << " " << param << std::endl;
-	file.push_back(instruction);
-	file.push_back(param);
+	//std::cout << bcfile.file.size() << " " << instruction << " " << param << std::endl;
+	bcfile.file.push_back(instruction);
+	bcfile.file.push_back(param);
 }
 
 void Interpreter::translate()
@@ -121,7 +121,7 @@ void Interpreter::translate()
 				//bytecode("JUMP_IF_FALSE", "0");
 				//std::vector<size_t> vec;
 				//jumpInstruction.push_back(vec);
-				//jumpInstruction.back().push_back(file.size() - 1);
+				//jumpInstruction.back().push_back(bcfile.file.size() - 1);
 				//statementType.push_back(ELIF_STATEMENT);
 				//nameScope.push_back(0);
 				break;
@@ -177,13 +177,13 @@ void Interpreter::translate()
 			bytecode("JUMP_IF_FALSE", "0");
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
-			jumpInstruction.back().push_back(file.size() - 1);
+			jumpInstruction.back().push_back(bcfile.file.size() - 1);
 			statementType.push_back(IF_STATEMENT);
 			nameScope.push_back(0);*/
 			break;
 		}
 		case WHILE_LOOP: {
-			continueJump.push_back(file.size() - 2);
+			continueJump.push_back(bcfile.file.size() - 2);
 			/*switch (getToken(codeFile.type.at(instruction + 1))) {
 			case NAME:
 				bytecode("LOAD_NAME", codeFile.token.at(instruction + 1));
@@ -212,14 +212,14 @@ void Interpreter::translate()
 			bytecode("JUMP_IF_FALSE", "0");
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
-			jumpInstruction.back().push_back(file.size() - 1);
+			jumpInstruction.back().push_back(bcfile.file.size() - 1);
 			statementType.push_back(WHILE_STATEMENT);
 			nameScope.push_back(0);
 			break;*/
 			statementType.push_back(WHILE_STATEMENT);
 			std::vector<size_t> vec;
 			jumpInstruction.push_back(vec);
-			jumpInstruction.back().push_back(file.size() - 2);
+			jumpInstruction.back().push_back(bcfile.file.size() - 2);
 			bytecode("NEW_PARAM_STACK", "0");
 			functionName.push_back("while");
 			functionOperatorType.push_back("NULL");
@@ -254,7 +254,7 @@ void Interpreter::translate()
 				instruction += 2;
 			}
 			bytecode("JUMP_IF_FALSE", "0");
-			jumpInstruction.back().push_back(file.size() - 1);
+			jumpInstruction.back().push_back(bcfile.file.size() - 1);
 			break;*/
 
 			bytecode("POP_BACK", "0");
@@ -331,7 +331,7 @@ void Interpreter::translate()
 					bytecode("LOAD_CONST", "1");
 					bytecode("COMPARE", "==");
 					bytecode("JUMP_IF_FALSE", "0");
-					jumpInstruction.back().push_back(file.size() - 1);
+					jumpInstruction.back().push_back(bcfile.file.size() - 1);
 					nameScope.push_back(0);
 				}
 				functionName.pop_back();
@@ -650,14 +650,14 @@ void Interpreter::translate()
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
-				file.at(elseJump.back()) = std::to_string(file.size() - 2);
+				bcfile.file.at(elseJump.back()) = std::to_string(bcfile.file.size() - 2);
 				elseJump.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
 					bytecode("JUMP", "0");
-					elseJump.push_back(file.size() - 1);
+					elseJump.push_back(bcfile.file.size() - 1);
 				}
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
+					bcfile.file.at(jumpInstruction.back().at(e)) = std::to_string(bcfile.file.size() - 2);
 				}
 				jumpInstruction.pop_back();
 				instruction += 1;
@@ -667,7 +667,7 @@ void Interpreter::translate()
 					bytecode("POP_NAME", "0");
 				}
 				nameScope.pop_back();
-				file.at(elseJump.back()) = std::to_string(file.size() - 2);
+				bcfile.file.at(elseJump.back()) = std::to_string(bcfile.file.size() - 2);
 				elseJump.pop_back();
 				instruction += 1;
 				break;
@@ -678,20 +678,20 @@ void Interpreter::translate()
 				nameScope.pop_back();
 				if (codeFile.token.at(instruction + 1) == "else") {
 					bytecode("JUMP", "0");
-					elseJump.push_back(file.size() - 1);
+					elseJump.push_back(bcfile.file.size() - 1);
 				}
 				for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-					file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
+					bcfile.file.at(jumpInstruction.back().at(e)) = std::to_string(bcfile.file.size() - 2);
 				}
 				jumpInstruction.pop_back();
 				instruction += 1;
 				break;
 			case WHILE_STATEMENT:
 
-				file.at(jumpInstruction.back().at(1)) = std::to_string(file.size());
+				bcfile.file.at(jumpInstruction.back().at(1)) = std::to_string(bcfile.file.size());
 
 				for (size_t a = 0; a < breakJump.size(); ++a) {
-					file.at(breakJump.at(a)) = std::to_string(file.size());
+					bcfile.file.at(breakJump.at(a)) = std::to_string(bcfile.file.size());
 				}
 				continueJump.pop_back();
 				breakJump.clear();
@@ -718,17 +718,17 @@ void Interpreter::translate()
 			break;
 		case ENDIF:
 			for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-				file.at(jumpInstruction.back().at(e)) = std::to_string(file.size() - 2);
+				bcfile.file.at(jumpInstruction.back().at(e)) = std::to_string(bcfile.file.size() - 2);
 			}
 			jumpInstruction.pop_back();
 			instruction += 1;
 			break;
 		case ENDWHILE:
 			for (size_t e = 0; e < jumpInstruction.back().size(); ++e) {
-				file.at(jumpInstruction.back().at(e)) = std::to_string(file.size());
+				bcfile.file.at(jumpInstruction.back().at(e)) = std::to_string(bcfile.file.size());
 			}
 			for (size_t a = 0; a < breakJump.size(); ++a) {
-				file.at(breakJump.at(a)) = std::to_string(file.size());
+				bcfile.file.at(breakJump.at(a)) = std::to_string(bcfile.file.size());
 			}
 			breakJump.clear();
 			bytecode("JUMP", std::to_string(jumpInstruction.back().front() - 9));
@@ -737,7 +737,7 @@ void Interpreter::translate()
 			break;
 		case BREAK:
 			bytecode("JUMP", "0");
-			breakJump.push_back(file.size() - 1);
+			breakJump.push_back(bcfile.file.size() - 1);
 			++instruction;
 			break;
 		case CONTINUE:

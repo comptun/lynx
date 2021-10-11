@@ -13,7 +13,7 @@ enum PCFid {
     SQRT,
     POW,
     PUTC,
-    INPUT,
+    _INPUT,
     MAX,
     MIN,
     SIN,
@@ -44,6 +44,16 @@ enum PCFid {
     SETPRECISION,
     EXP,
     SHA256,
+    CLOCK,
+    TIME,
+    SLEEP,
+    FACT,
+    READF,
+    WRITEF,
+    APPEND,
+    POP,
+    ACCESS,
+    ARRAY,
 };
 
 enum booleanExpressions {
