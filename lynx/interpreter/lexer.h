@@ -56,6 +56,8 @@ enum tokenEnum {
 	AMPERSAND,
 	SEMI_COLON,
 	IMPORT,
+	EXPONENT,
+	EXPONENT_EQUALS,
 };
 
 class Lexer {

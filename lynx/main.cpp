@@ -43,5 +43,5 @@ int main()
 			std::cout << "\"" << std::get<std::string>(lynx.stack.at(i)) << "\" ";
 	}*/
 
-	std::cin.get();
+	//std::cin.get();
 }

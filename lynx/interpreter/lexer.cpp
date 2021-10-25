@@ -50,6 +50,8 @@ std::vector<std::string> tokenNames = {
 	"&",
 	";",
 	"import",
+	"^",
+	"^=",
 };
 
 std::vector<std::string> tokenTypes = {
@@ -101,6 +103,8 @@ std::vector<std::string> tokenTypes = {
 	"AMPERSAND",
 	"SEMI_COLON",
 	"IMPORT",
+	"EXPONENT",
+	"EXPONENT_EQUALS",
 };
 
 bool Lexer::isFloat(std::string num)
@@ -286,7 +290,8 @@ bool Lexer::special1Character(char character)
 		or character == '>'
 		or character == '<'
 		or character == '['
-		or character == ']';
+		or character == ']'
+		or character == '^';
 }
 
 bool Lexer::special2Character(std::string characters)
@@ -302,7 +307,9 @@ bool Lexer::special2Character(std::string characters)
 		or characters == "+="
 		or characters == "-="
 		or characters == "*="
-		or characters == "/=";
+		or characters == "/="
+		or characters == "%="
+		or characters == "^=";
 }
 
 void Lexer::removeBlankspace()
@@ -358,6 +365,7 @@ void Lexer::readCode(std::ifstream fileName)
 							or character2 == "*="
 							or character2 == "%="
 							or character2 == "++"
+							or character2 == "^="
 							or character2 == "--") {
 							tokenize("=");
 							tokenize(codeFile.token.at(codeFile.token.size() - 2));

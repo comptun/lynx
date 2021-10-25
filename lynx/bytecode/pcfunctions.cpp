@@ -8,6 +8,8 @@
 #include <conio.h>
 #include <Windows.h>
 #include <fstream>
+#include <chrono>
+#include <ctime>
 
 std::vector<std::string> PCFnames = {
     "print",
@@ -62,13 +64,7 @@ std::vector<std::string> PCFnames = {
 
 void ByteInterpreter::executePCF(std::string funcName)
 {
-    size_t i = 0;
-    for (; i < PCFnames.size(); ++i) {
-        if (PCFnames.at(i) == funcName)
-            break;
-    }  
-    switch (i) {
-    case PRINT: {
+    if (funcName == "print") {
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
             if (std::holds_alternative<long long int>(paramStack.back().at(i)))
                 std::cout << std::get<long long int>(paramStack.back().at(i));
@@ -111,41 +107,38 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
             }
         }
-        break;
     }
-    case ENDL:
+    else if (funcName == "endl") {
         returnedValue = "\n";
-        break;
-    case RAND: {
+    }
+    else if (funcName == "rand") {
         long long int difference = std::get<long long int>(paramStack.back().at(1)) - std::get<long long int>(paramStack.back().at(0));
         returnedValue = rand() % difference + std::get<long long int>(paramStack.back().at(0));
-        break;
     }
-    case SWAP: {
+    else if (funcName == "swap") {
         std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> item1 = stack.at(std::get<long long int>(paramStack.back().at(0)));
         std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> item2 = stack.at(std::get<long long int>(paramStack.back().at(1)));
         stack.at(std::get<long long int>(paramStack.back().at(1))) = item1;
         stack.at(std::get<long long int>(paramStack.back().at(0))) = item2;
-        break;
     }
-    case SQRT:
+    else if (funcName == "sqrt") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = sqrt(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = sqrt(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case POW:
+    }
+    else if (funcName == "pow") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = pow(std::get<long long int>(paramStack.back().at(0)), std::get<long long int>(paramStack.back().at(1)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = pow(std::get<long double>(paramStack.back().at(0)), std::get<long double>(paramStack.back().at(1)));
-        break;
-    case PUTC:
+    }
+    else if (funcName == "putc") {
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
             std::cout << static_cast<char>(std::get<long long int>(paramStack.back().at(i)));
         }
-        break;
-    case _INPUT: {
+    }
+    else if (funcName == "input") {
         for (size_t i = 0; i < paramStack.back().size(); ++i) {
             if (std::holds_alternative<long long int>(paramStack.back().at(i)))
                 std::cout << std::get<long long int>(paramStack.back().at(i));
@@ -191,53 +184,54 @@ void ByteInterpreter::executePCF(std::string funcName)
         std::string input;
         std::cin >> input;
         returnedValue = input;
-        break;
     }
-    case MAX:
+    else if (funcName == "max") {
         returnedValue = (paramStack.back().at(0) > paramStack.back().at(1) ? paramStack.back().at(0) : paramStack.back().at(1));
-        break;
-    case MIN:
+    }
+    else if (funcName == "min") {
         returnedValue = (paramStack.back().at(1) > paramStack.back().at(0) ? paramStack.back().at(0) : paramStack.back().at(1));
-        break;
-    case SIN:
+    }
+    else if (funcName == "sin") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = sin(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = sin(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case COS:
+    }
+    else if (funcName == "cos") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = cos(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = cos(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case TAN:
+    }
+    else if (funcName == "tan") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = tan(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = tan(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case LN:
+    }
+    else if (funcName == "ln") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = log(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = log(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case ISPRIME: {
+    }
+    else if (funcName == "isprime") {
         bool isPrime = true;
         long double sqrtNum = 0;
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             sqrtNum = sqrt(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             sqrtNum = sqrt(std::get<long double>(paramStack.back().at(0)));
-        if (std::get<long long int>(paramStack.back().at(0)) == 0
-            or std::get<long long int>(paramStack.back().at(0)) == 1
-            or std::get<long long int>(paramStack.back().at(0)) == 4
-            or std::get<long long int>(paramStack.back().at(0)) == 9) {
-            returnedValue = false;
-            break;
+        if (std::get<long long int>(paramStack.back().at(0)) == 2) {
+            returnedValue = true;
+            goto func_end;
         }
-        for (long long int a = 2; a < sqrtNum; ++a) {
+        if (std::get<long long int>(paramStack.back().at(0)) == 0
+            or std::get<long long int>(paramStack.back().at(0)) == 1) {
+            returnedValue = false;
+            goto func_end;
+        }
+        for (long long int a = 2; a < sqrtNum + 1; ++a) {
             if (std::get<long long int>(paramStack.back().at(0)) % a == 0) {
                 isPrime = false;
                 returnedValue = false;
@@ -247,77 +241,74 @@ void ByteInterpreter::executePCF(std::string funcName)
         if (isPrime) {
             returnedValue = true;
         }
-        break;
     }
-    case INT_CAST:
+    else if (funcName == "int") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = paramStack.back().at(0);
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = static_cast<long long int>(std::get<long double>(paramStack.back().at(0)));
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = std::stoi(std::get<std::string>(paramStack.back().at(0)));
-        break;
-    case FLOAT_CAST:
+    }
+    else if (funcName == "float") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = static_cast<long double>(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = paramStack.back().at(0);
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = std::stod(std::get<std::string>(paramStack.back().at(0)));
-        break;
-    case STRING_CAST:
+    }
+    else if (funcName == "string") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = std::to_string(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = std::to_string(std::get<long double>(paramStack.back().at(0)));
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             returnedValue = paramStack.back().at(0);
-        break;
-    case CHAR_CAST:
+    }
+    else if (funcName == "char") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = std::string(1, static_cast<char>(std::get<long long int>(paramStack.back().at(0))));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = std::string(1, static_cast<char>(std::get<long double>(paramStack.back().at(0))));
-        break;
-    case LEN:
+    }
+    else if (funcName == "len") {
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
             returnedValue = static_cast<long long int>(std::get<std::string>(paramStack.back().at(0)).size());
         }
         if (std::holds_alternative<std::vector<std::variant<long long int, long double, std::string>>>(paramStack.back().at(0))) {
             returnedValue = static_cast<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(paramStack.back().at(0)).size());
         }
-        break;
-    case REVERSE: {
+    }
+    else if (funcName == "reverse") {
         std::string revString = std::get<std::string>(paramStack.back().at(0));
         std::reverse(revString.begin(), revString.end());
         returnedValue = revString;
-        break;
     }
-    case SORT: {
+    else if (funcName == "sort") {
         std::string sortString = std::get<std::string>(paramStack.back().at(0));
         std::sort(sortString.begin(), sortString.end());
         returnedValue = sortString;
-        break;
     }
-    case ASIN:
+    else if (funcName == "asin") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = asin(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = asin(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case ACOS:
+    }
+    else if (funcName == "acos") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = acos(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = acos(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case ATAN:
+    }
+    else if (funcName == "atan") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = atan(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = atan(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case KEYPRESSED: {
+    }
+    else if (funcName == "keyPressed") {
         char key = _getch();
         char keypressed = ' ';
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
@@ -327,12 +318,11 @@ void ByteInterpreter::executePCF(std::string funcName)
         else if (std::holds_alternative<std::string>(paramStack.back().at(0)))
             keypressed = std::get<std::string>(paramStack.back().at(0)).at(0);
         returnedValue = key == keypressed;
-        break;
     }
-    case GETKEYPRESSED:
+    else if (funcName == "getKeyPressed") {
         returnedValue = _getch();
-        break;
-    case PARENTHESIS: {
+    }
+    else if (funcName == "parenthesis") {
         if (paramStack.back().size() > 1) {
             std::vector<long long int> firstRound;
             std::vector<long long int> secondRound;
@@ -426,14 +416,11 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
             }
             returnedValue = true;
-            break;
+            goto func_end;
         }
         returnedValue = paramStack.back().at(0);
-        break;
     }
-    case BOOLEXPR:
-    case IF_EXPR:
-    case WHILE_EXPR: {
+    else if (funcName == "boolexpr" or funcName == "if" or funcName == "while") {
         std::vector<long long int> firstRound;
         std::vector<long long int> secondRound;
         for (size_t j = 0; j < paramStack.back().size();) {
@@ -526,9 +513,8 @@ void ByteInterpreter::executePCF(std::string funcName)
             }
         }
         returnedValue = true;
-        break;
     }
-    case FIND: {
+    else if (funcName == "find") {
         bool found = false;
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
             for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(1)).size(); ++j) {
@@ -550,50 +536,54 @@ void ByteInterpreter::executePCF(std::string funcName)
         }
         if (found == false)
             returnedValue = -1;
-        break;
     }
-    case SETPRECISION:
+    else if (funcName == "setprecision") {
         std::cout << std::setprecision(std::get<long long int>(paramStack.back().at(0)));
         returnedValue = 0;
-        break;
-    case EXP:
+    }
+    else if (funcName == "exp") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
             returnedValue = exp(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = exp(std::get<long double>(paramStack.back().at(0)));
-        break;
-    case SHA256:
+    }
+    else if (funcName == "sha256") {
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
             returnedValue = sha256(std::get<std::string>(paramStack.back().at(0)));
-            break;
+            goto func_end;
         }
         else if (std::holds_alternative<long long int>(paramStack.back().at(0))) {
             returnedValue = sha256(std::to_string(std::get<long long int>(paramStack.back().at(0))));
-            break;
+            goto func_end;
         }
         else if (std::holds_alternative<long double>(paramStack.back().at(0))) {
             returnedValue = sha256(std::to_string(std::get<long double>(paramStack.back().at(0))));
-            break;
+            goto func_end;
         }
         returnedValue = -1;
-        break;
-    case CLOCK:
+    }
+    else if (funcName == "clock") {
         returnedValue = clock();
-        break;
-    case TIME:
-        returnedValue = static_cast<long long int>(time(NULL));
-        break;
-    case SLEEP:
+    }
+    else if (funcName == "time") {
+        if (std::get<long long int>(paramStack.back().at(0)) == 0) {
+            returnedValue = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
+        }
+        if (std::get<long long int>(paramStack.back().at(0)) == 1) {
+            returnedValue = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();;
+        }
+    }
+    else if (funcName == "sleep") {
         Sleep(std::get<long long int>(paramStack.back().at(0)));
-        break;
-    case FACT: {
+    }
+    else if (funcName == "fact") {
         long long int fact = 1;
         for (long long int i = 1; i <= std::get<long long int>(paramStack.back().at(0)); ++i) {
             fact *= i;
         }
         returnedValue = fact;
     }
-    case READF: {
+    else if (funcName == "readf") {
         std::string line;
         std::string fileContents;
         std::ifstream readFile(std::get<std::string>(paramStack.back().at(0)));
@@ -603,19 +593,17 @@ void ByteInterpreter::executePCF(std::string funcName)
         }
         readFile.close();
         returnedValue = fileContents;
-        break;
     }
-    case WRITEF: {
+    else if (funcName == "writef") {
         std::ofstream writeFile(std::get<std::string>(paramStack.back().at(0)), std::fstream::app);
         if (writeFile.is_open()) {
             writeFile << std::get<std::string>(paramStack.back().at(1));
         }
         writeFile.close();
-        break;
     }
-    case APPEND: {
+    else if (funcName == "append") {
         std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(static_cast<char>(std::get<long long int>(paramStack.back().at(1))));
-        break;
+        goto func_end;
 
         if (std::holds_alternative<long long int>(paramStack.back().at(1))) {
             std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(std::get<long long int>(paramStack.back().at(1)));
@@ -626,16 +614,15 @@ void ByteInterpreter::executePCF(std::string funcName)
         if (std::holds_alternative<std::string>(paramStack.back().at(1))) {
             std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(std::get<std::string>(paramStack.back().at(1)));
         }
-        break;
     }
-    case POP:
+    else if (funcName == "pop") {
         if (std::holds_alternative<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0))))) {
             std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).pop_back();
-            break;
+            goto func_end;
         }
         std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).pop_back();
-        break;
-    case ACCESS:
+    }
+    else if (funcName == "access") {
         /*if (std::holds_alternative<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))))) {
             returnedValue = std::get<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
             break;
@@ -649,8 +636,8 @@ void ByteInterpreter::executePCF(std::string funcName)
             break;
         }*/
         returnedValue = std::string(1, std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
-        break;
-    case ARRAY: {
+    }
+    else if (funcName == "array") {
         std::vector<std::variant<long long int, long double, std::string>> newArray;
         if (std::holds_alternative<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0))))) {
             for (long long int n = 0; n < std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).size(); ++n) {
@@ -658,10 +645,10 @@ void ByteInterpreter::executePCF(std::string funcName)
             }
         }
         returnedValue = newArray;
-        break;
-    }
     }
     /*stack.push_back(returnedValue);
     stack.push_back(static_cast<long long int>(stack.size() - 1));*/
+func_end:
     paramStack.pop_back();
 }
+
