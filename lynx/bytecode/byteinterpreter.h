@@ -34,13 +34,20 @@ public:
 
 	Names names;
 
-	std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> returnedValue;
-	
-	std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>> stack;
-	//std::vector<int> stack;
-	std::vector<std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>>> paramStack;
+	typedef std::vector<std::variant<long long int, long double, std::string>> t_list;
+	typedef std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> t_returnvalue;
+	typedef std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>> t_stack;
+	typedef std::vector<std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>>> t_paramstack;
+
+	t_returnvalue returnedValue;
+	t_stack stack;
+	t_stack listStack;
+	t_paramstack paramStack;
 	std::vector<std::vector<int>> vargParamStack;
 
+	long long int getListPointer(std::string listPointer);
+	bool beginsWith(std::string str, std::string begin);
+	void newList(long long int listPtr);
 	void executePCF(std::string funcName);
 
 	bool doesNameExist(std::string name);

@@ -4,7 +4,8 @@
 
 #include <vector>
 #include <math.h>
-#include <bits/stdc++.h>
+
+#include <iomanip>
 #include <conio.h>
 #include <Windows.h>
 #include <fstream>
@@ -62,6 +63,50 @@ std::vector<std::string> PCFnames = {
     "array",
 };
 
+long long int ByteInterpreter::getListPointer(std::string listPointer)
+{
+    std::string strptr;
+    for (size_t i = 16; i < listPointer.size(); ++i)
+        strptr.push_back(listPointer.at(i));
+    return std::stoi(strptr);
+}
+
+bool ByteInterpreter::beginsWith(std::string str, std::string begin)
+{
+    if (str >= begin) {
+        for (size_t i = 0; i < begin.size(); ++i) {
+            if (begin.at(i) != str.at(i))
+                return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+void ByteInterpreter::newList(long long int listPtr)
+{
+    std::cout << "[ ";
+    for (size_t i = 0; i < std::get<t_list>(listStack.at(listPtr)).size(); ++i) {
+        if (std::holds_alternative<long long int>(std::get<t_list>(listStack.at(listPtr)).at(i))) {
+            std::cout << std::get<long long int>(std::get<t_list>(listStack.at(listPtr)).at(i));
+        }
+        if (std::holds_alternative<long double>(std::get<t_list>(listStack.at(listPtr)).at(i))) {
+            std::cout << std::get<long double>(std::get<t_list>(listStack.at(listPtr)).at(i));
+        }
+        if (std::holds_alternative<std::string>(std::get<t_list>(listStack.at(listPtr)).at(i))) {
+            if (beginsWith(std::get<std::string>(std::get<t_list>(listStack.at(listPtr)).at(i)), "__LIST_POINTER__")) {
+                newList(getListPointer(std::get<std::string>(std::get<t_list>(listStack.at(listPtr)).at(i))));
+                continue;
+            }
+            std::cout << "\"" << std::get<std::string>(std::get<t_list>(listStack.at(listPtr)).at(i)) << "\"";
+        }
+        if (i < std::get<t_list>(listStack.at(listPtr)).size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << " ], ";
+}
+
 void ByteInterpreter::executePCF(std::string funcName)
 {
     if (funcName == "print") {
@@ -70,7 +115,33 @@ void ByteInterpreter::executePCF(std::string funcName)
                 std::cout << std::get<long long int>(paramStack.back().at(i));
             else if (std::holds_alternative<long double>(paramStack.back().at(i)))
                 std::cout << std::get<long double>(paramStack.back().at(i));
+            else if (std::holds_alternative<t_list>(paramStack.back().at(i)) && std::get<t_list>(paramStack.back().at(i)).size() > 0) {
+                std::cout << "[ ";
+                for (size_t k = 0; k < std::get<t_list>(paramStack.back().at(i)).size(); ++k) {
+                    if (std::holds_alternative<long long int>(std::get<t_list>(paramStack.back().at(i)).at(k))) {
+                        std::cout << std::get<long long int>(std::get<t_list>(paramStack.back().at(i)).at(k));
+                    }
+                    if (std::holds_alternative<long double>(std::get<t_list>(paramStack.back().at(i)).at(k))) {
+                        std::cout << std::get<long double>(std::get<t_list>(paramStack.back().at(i)).at(k));
+                    }
+                    if (std::holds_alternative<std::string>(std::get<t_list>(paramStack.back().at(i)).at(k))) {
+                        if (beginsWith(std::get<std::string>(std::get<t_list>(paramStack.back().at(i)).at(k)), "__LIST_POINTER__")) {
+                            newList(getListPointer(std::get<std::string>(std::get<t_list>(paramStack.back().at(i)).at(k))));
+                            continue;
+                        }
+                        std::cout << "\"" << std::get<std::string>(std::get<t_list>(paramStack.back().at(i)).at(k)) << "\"";
+                    }
+                    if (k < std::get<t_list>(paramStack.back().at(i)).size() - 1) {
+                        std::cout << ", ";
+                    }
+                }
+                std::cout << " ]";
+            }
             else if (std::holds_alternative<std::string>(paramStack.back().at(i))) {
+                if (beginsWith(std::get<std::string>(paramStack.back().at(i)), "__LIST_POINTER__")) {
+                    newList(getListPointer(std::get<std::string>(paramStack.back().at(i))));
+                    continue;
+                }
                 bool isInVariableCall = false;
                 std::string varName;
                 for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(i)).size();) {
@@ -107,6 +178,7 @@ void ByteInterpreter::executePCF(std::string funcName)
                 }
             }
         }
+        returnedValue = true;
     }
     else if (funcName == "endl") {
         returnedValue = "\n";
@@ -116,8 +188,8 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = rand() % difference + std::get<long long int>(paramStack.back().at(0));
     }
     else if (funcName == "swap") {
-        std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> item1 = stack.at(std::get<long long int>(paramStack.back().at(0)));
-        std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> item2 = stack.at(std::get<long long int>(paramStack.back().at(1)));
+        t_returnvalue item1 = stack.at(std::get<long long int>(paramStack.back().at(0)));
+        t_returnvalue item2 = stack.at(std::get<long long int>(paramStack.back().at(1)));
         stack.at(std::get<long long int>(paramStack.back().at(1))) = item1;
         stack.at(std::get<long long int>(paramStack.back().at(0))) = item2;
     }
@@ -184,6 +256,10 @@ void ByteInterpreter::executePCF(std::string funcName)
         std::string input;
         std::cin >> input;
         returnedValue = input;
+    }
+    else if (funcName == "pause") {
+        std::cin.get();
+        returnedValue = true;
     }
     else if (funcName == "max") {
         returnedValue = (paramStack.back().at(0) > paramStack.back().at(1) ? paramStack.back().at(0) : paramStack.back().at(1));
@@ -272,23 +348,41 @@ void ByteInterpreter::executePCF(std::string funcName)
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = std::string(1, static_cast<char>(std::get<long double>(paramStack.back().at(0))));
     }
-    else if (funcName == "len") {
+    else if (funcName == "size") {
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
             returnedValue = static_cast<long long int>(std::get<std::string>(paramStack.back().at(0)).size());
         }
-        if (std::holds_alternative<std::vector<std::variant<long long int, long double, std::string>>>(paramStack.back().at(0))) {
-            returnedValue = static_cast<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(paramStack.back().at(0)).size());
+        if (std::holds_alternative<t_list>(paramStack.back().at(0))) {
+            returnedValue = static_cast<long long int>(std::get<t_list>(paramStack.back().at(0)).size());
         }
     }
     else if (funcName == "reverse") {
-        std::string revString = std::get<std::string>(paramStack.back().at(0));
-        std::reverse(revString.begin(), revString.end());
-        returnedValue = revString;
+        if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
+            std::string revString;
+            revString = std::get<std::string>(paramStack.back().at(0));
+            std::reverse(revString.begin(), revString.end());
+            returnedValue = revString;
+        }
+        else if (std::holds_alternative<t_list>(paramStack.back().at(0))) {
+            t_list revVec;
+            revVec = std::get<t_list>(paramStack.back().at(0));
+            std::reverse(revVec.begin(), revVec.end());
+            returnedValue = revVec;
+        }
     }
     else if (funcName == "sort") {
-        std::string sortString = std::get<std::string>(paramStack.back().at(0));
-        std::sort(sortString.begin(), sortString.end());
-        returnedValue = sortString;
+        if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
+            std::string sortString;
+            sortString = std::get<std::string>(paramStack.back().at(0));
+            std::sort(sortString.begin(), sortString.end());
+            returnedValue = sortString;
+        }
+        else if (std::holds_alternative<t_list>(paramStack.back().at(0))) {
+            t_list sortVec;
+            sortVec = std::get<t_list>(paramStack.back().at(0));
+            std::sort(sortVec.begin(), sortVec.end());
+            returnedValue = sortVec;
+        }
     }
     else if (funcName == "asin") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
@@ -577,11 +671,12 @@ void ByteInterpreter::executePCF(std::string funcName)
         Sleep(std::get<long long int>(paramStack.back().at(0)));
     }
     else if (funcName == "fact") {
-        long long int fact = 1;
-        for (long long int i = 1; i <= std::get<long long int>(paramStack.back().at(0)); ++i) {
-            fact *= i;
+        if (std::holds_alternative<long double>(paramStack.back().at(0))) {
+            returnedValue = tgamma(std::get<long double>(paramStack.back().at(0)) + 1);
         }
-        returnedValue = fact;
+        if (std::holds_alternative<long long int>(paramStack.back().at(0))) {
+            returnedValue = tgamma(std::get<long long int>(paramStack.back().at(0)) + 1);
+        }
     }
     else if (funcName == "readf") {
         std::string line;
@@ -602,46 +697,56 @@ void ByteInterpreter::executePCF(std::string funcName)
         writeFile.close();
     }
     else if (funcName == "append") {
-        std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(static_cast<char>(std::get<long long int>(paramStack.back().at(1))));
-        goto func_end;
-
+        t_list appendVector = std::get<t_list>(paramStack.back().at(0));
         if (std::holds_alternative<long long int>(paramStack.back().at(1))) {
-            std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(std::get<long long int>(paramStack.back().at(1)));
+            appendVector.push_back(std::get<long long int>(paramStack.back().at(1)));
         }
         if (std::holds_alternative<long double>(paramStack.back().at(1))) {
-            std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(std::get<long double>(paramStack.back().at(1)));
+            appendVector.push_back(std::get<long double>(paramStack.back().at(1)));
         }
         if (std::holds_alternative<std::string>(paramStack.back().at(1))) {
-            std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).push_back(std::get<std::string>(paramStack.back().at(1)));
+            appendVector.push_back(std::get<std::string>(paramStack.back().at(1)));
         }
+        returnedValue = appendVector;
     }
     else if (funcName == "pop") {
-        if (std::holds_alternative<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0))))) {
-            std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).pop_back();
-            goto func_end;
-        }
-        std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).pop_back();
+        t_list popVector = std::get<t_list>(paramStack.back().at(0));
+        popVector.pop_back();
+        returnedValue = popVector;
     }
     else if (funcName == "access") {
-        /*if (std::holds_alternative<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<long long int>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
-            break;
+        if (std::holds_alternative<std::string>(paramStack.back().at(0)) and beginsWith(std::get<std::string>(paramStack.back().at(0)), "__LIST_POINTER__")) {
+            long long int listptr = getListPointer(std::get<std::string>(paramStack.back().at(0)));
+            returnedValue = listStack.at(listptr);
         }
-        if (std::holds_alternative<long double>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<long double>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
-            break;
+        t_list searchVector = std::get<t_list>(paramStack.back().at(0));
+        if (std::holds_alternative<long long int>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
+            returnedValue = std::get<long long int>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
         }
-        if (std::holds_alternative<std::string>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<std::string>(std::get<std::vector<std::variant<long long int, long double, std::string>>>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
-            break;
-        }*/
-        returnedValue = std::string(1, std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(std::get<long long int>(paramStack.back().at(1))));
+        if (std::holds_alternative<long double>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
+            returnedValue = std::get<long double>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
+        }
+        if (std::holds_alternative<std::string>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
+            returnedValue = std::get<std::string>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
+        }
     }
     else if (funcName == "array") {
-        std::vector<std::variant<long long int, long double, std::string>> newArray;
-        if (std::holds_alternative<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0))))) {
-            for (long long int n = 0; n < std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).size(); ++n) {
-                newArray.push_back(std::string(1, std::get<std::string>(stack.at(std::get<long long int>(paramStack.back().at(0)))).at(n)));
+        t_list newArray;
+        if (paramStack.back().size() > 0) {
+            for (size_t k = 0; k < paramStack.back().size(); ++k) {
+                if (std::holds_alternative<long long int>(paramStack.back().at(k))) {
+                    newArray.push_back(std::get<long long int>(paramStack.back().at(k)));
+                }
+                if (std::holds_alternative<long double>(paramStack.back().at(k))) {
+                    newArray.push_back(std::get<long double>(paramStack.back().at(k)));
+                }
+                if (std::holds_alternative<std::string>(paramStack.back().at(k))) {
+                    newArray.push_back(std::get<std::string>(paramStack.back().at(k)));
+                }
+                if (std::holds_alternative<t_list>(paramStack.back().at(k))) {
+                    listStack.push_back(std::get<t_list>(paramStack.back().at(k)));
+                    newArray.push_back("__LIST_POINTER__" + std::to_string(listStack.size() - 1));
+                }
             }
         }
         returnedValue = newArray;

@@ -133,6 +133,18 @@ bool Lexer::isInteger(std::string num)
 void Lexer::tokenize(std::string token) 
 {
 	if (token != "" && token != " ") {
+		if (token == "[") {
+			codeFile.token.push_back("array");
+			codeFile.type.push_back("NAME");
+			codeFile.token.push_back("(");
+			codeFile.type.push_back("LBRACKET");
+			return;
+		}
+		if (token == "]") {
+			codeFile.token.push_back(")");
+			codeFile.type.push_back("RBRACKET");
+			return;
+		}
 		if (token == "(" 
 			and (codeFile.type.back() != "NAME" 
 			and codeFile.type.back() != "IF_STATEMENT"
