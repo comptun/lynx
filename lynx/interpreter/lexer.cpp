@@ -107,6 +107,18 @@ std::vector<std::string> tokenTypes = {
 	"EXPONENT_EQUALS",
 };
 
+bool Lexer::beginsWith(std::string str, std::string begin)
+{
+	if (str >= begin) {
+		for (size_t i = 0; i < begin.size(); ++i) {
+			if (begin.at(i) != str.at(i))
+				return false;
+		}
+		return true;
+	}
+	return false;
+}
+
 bool Lexer::isFloat(std::string num)
 {
 	unsigned int decimalCount = 0;
@@ -130,10 +142,23 @@ bool Lexer::isInteger(std::string num)
 	return true;
 }
 
+void Lexer::m_tokenization(std::string token, std::string type)
+{
+	codeFile.token.push_back(token);
+	codeFile.type.push_back(type);
+}
+
 void Lexer::tokenize(std::string token) 
 {
 	if (token != "" && token != " ") {
 		if (token == "[") {
+			if (codeFile.type.back() == "RBRACKET") {
+				codeFile.token.pop_back();
+				codeFile.type.pop_back();
+				codeFile.token.push_back(",");
+				codeFile.type.push_back("COMMA");
+				return;
+			}
 			codeFile.token.push_back("array");
 			codeFile.type.push_back("NAME");
 			codeFile.token.push_back("(");
@@ -235,6 +260,13 @@ void Lexer::retokenize(std::string token, size_t pos)
 
 
 	if (token != "" && token != " ") {
+		if (token == "[") {
+			codeFile.token.at(pos) = "array";
+			codeFile.type.at(pos) = "NAME";
+			codeFile.token.at(pos) = "(";
+			codeFile.type.at(pos) = "LBRACKET";
+			return;
+		}
 		if (token == "("
 			and (codeFile.type.at(pos - 1) != "NAME"
 				and codeFile.type.at(pos - 1) != "IF_STATEMENT"
@@ -324,19 +356,13 @@ bool Lexer::special2Character(std::string characters)
 		or characters == "^=";
 }
 
-void Lexer::removeBlankspace()
+bool Lexer::isInVector(std::string str, std::vector<std::string> vec)
 {
-	/*size_t pos = 0;
-	for (auto i = codeFile.token.begin(); i != codeFile.token.end(); ++i, ++pos) {
-		if (codeFile.token.at(pos) == "" or codeFile.token.at(pos) == " ") {
-			codeFile.token.erase(i);
-			codeFile.type.erase(i);
-		}
+	for (size_t i = 0; i < vec.size(); ++i) {
+		if (vec.at(i) == str)
+			return true;
 	}
-	for (size_t i = 0; i < codeFile.token.size(); ++i) {
-		if (codeFile.token.at(i) == "" or codeFile.token.at(i) == " ")
-			removeBlankspace();
-	}*/
+	return false;
 }
 
 void Lexer::readCode(std::ifstream fileName)
@@ -346,6 +372,15 @@ void Lexer::readCode(std::ifstream fileName)
 	std::string lineContent;
 	while (getline(fileName, line)) {
 		int tabNum = 0;
+		if (beginsWith(line, "import")) {
+			std::string fileName2;
+			for (size_t i = 8; line.at(i) != '"'; ++i) {
+				fileName2 += line.at(i);
+			}
+			readCode(std::ifstream(fileName2));
+			readFiles.push_back(fileName2);
+			continue;
+		}
 		for (size_t i = 0; i < line.length(); ++i) {
 			if (line.at(i) == '"' or line.at(i) == '\'') {
 				if (line.at(i + 1) == '"') {

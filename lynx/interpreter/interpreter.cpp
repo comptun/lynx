@@ -467,6 +467,8 @@ void Interpreter::translate()
 				}
 				else {
 					currentName.push_back(codeFile.token.at(instruction));
+					/*bytecode("POP_BACK", "0");
+					bytecode("LOAD_REF", codeFile.token.at(instruction + 2));*/
 					bytecode("LOAD_BACK_REF", "0");
 					isInNameAssignment = true;
 				}
@@ -629,6 +631,10 @@ void Interpreter::translate()
 			if (isInNameAssignment) {
 				bytecode("POP_BACK", "0");
 				bytecode("STORE_NAME", currentName.back());
+				if (knownNames.size() > 0 and currentName.size() > 0) {
+					if (knownNames.back() == currentName.back())
+						bytecode("POP_BACK", "0");
+				}
 				currentName.pop_back();
 				isInNameAssignment = false;
 				break;

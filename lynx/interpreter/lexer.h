@@ -68,8 +68,11 @@ public:
 		std::vector<int> indents;
 	};
 	File codeFile;
+	std::vector<std::string> readFiles;
+	bool isInVector(std::string str, std::vector<std::string> vec);
+	bool beginsWith(std::string str, std::string begin);
 	std::string getImportType(std::string token);
-	void removeBlankspace();
+	void m_tokenization(std::string token, std::string type);
 	bool isFloat(std::string num);
 	bool isInteger(std::string num);
 	bool special1Character(char character);

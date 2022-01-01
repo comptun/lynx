@@ -32,7 +32,7 @@ public:
 		std::vector<unsigned int> reference;
 	};
 
-	Names names;
+	std::vector<Names> names;
 
 	typedef std::vector<std::variant<long long int, long double, std::string>> t_list;
 	typedef std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>> t_returnvalue;
@@ -40,7 +40,7 @@ public:
 	typedef std::vector<std::vector<std::variant<long long int, long double, std::string, std::vector<std::variant<long long int, long double, std::string>>>>> t_paramstack;
 
 	t_returnvalue returnedValue;
-	t_stack stack;
+	std::vector<t_stack> stack;
 	t_stack listStack;
 	t_paramstack paramStack;
 	std::vector<std::vector<int>> vargParamStack;
@@ -55,6 +55,5 @@ public:
 	bool isInteger(std::string num);
 	bool isFloat(std::string num);
 
-	void readFile(std::ifstream fileName);
 	void interpret();
 };

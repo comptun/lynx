@@ -147,12 +147,12 @@ void ByteInterpreter::executePCF(std::string funcName)
                 for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(i)).size();) {
                     if (isInVariableCall) {
                         if (std::get<std::string>(paramStack.back().at(i)).at(j) == '}') {
-                            if (std::holds_alternative<long long int>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<long long int>(stack.at(getNameReference(varName)));
-                            else if (std::holds_alternative<long double>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<long double>(stack.at(getNameReference(varName)));
-                            else if (std::holds_alternative<std::string>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<std::string>(stack.at(getNameReference(varName)));
+                            if (std::holds_alternative<long long int>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<long long int>(stack.back().at(getNameReference(varName)));
+                            else if (std::holds_alternative<long double>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<long double>(stack.back().at(getNameReference(varName)));
+                            else if (std::holds_alternative<std::string>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<std::string>(stack.back().at(getNameReference(varName)));
                             varName.clear();
                             ++j;
                             isInVariableCall = false;
@@ -188,10 +188,10 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = rand() % difference + std::get<long long int>(paramStack.back().at(0));
     }
     else if (funcName == "swap") {
-        t_returnvalue item1 = stack.at(std::get<long long int>(paramStack.back().at(0)));
-        t_returnvalue item2 = stack.at(std::get<long long int>(paramStack.back().at(1)));
-        stack.at(std::get<long long int>(paramStack.back().at(1))) = item1;
-        stack.at(std::get<long long int>(paramStack.back().at(0))) = item2;
+        t_returnvalue item1 = stack.back().at(std::get<long long int>(paramStack.back().at(0)));
+        t_returnvalue item2 = stack.back().at(std::get<long long int>(paramStack.back().at(1)));
+        stack.back().at(std::get<long long int>(paramStack.back().at(1))) = item1;
+        stack.back().at(std::get<long long int>(paramStack.back().at(0))) = item2;
     }
     else if (funcName == "sqrt") {
         if (std::holds_alternative<long long int>(paramStack.back().at(0)))
@@ -222,12 +222,12 @@ void ByteInterpreter::executePCF(std::string funcName)
                 for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(i)).size();) {
                     if (isInVariableCall) {
                         if (std::get<std::string>(paramStack.back().at(i)).at(j) == '}') {
-                            if (std::holds_alternative<long long int>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<long long int>(stack.at(getNameReference(varName)));
-                            else if (std::holds_alternative<long double>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<long double>(stack.at(getNameReference(varName)));
-                            else if (std::holds_alternative<std::string>(stack.at(getNameReference(varName))))
-                                std::cout << std::get<std::string>(stack.at(getNameReference(varName)));
+                            if (std::holds_alternative<long long int>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<long long int>(stack.back().at(getNameReference(varName)));
+                            else if (std::holds_alternative<long double>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<long double>(stack.back().at(getNameReference(varName)));
+                            else if (std::holds_alternative<std::string>(stack.back().at(getNameReference(varName))))
+                                std::cout << std::get<std::string>(stack.back().at(getNameReference(varName)));
                             varName.clear();
                             ++j;
                             isInVariableCall = false;
@@ -350,9 +350,14 @@ void ByteInterpreter::executePCF(std::string funcName)
     }
     else if (funcName == "size") {
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
-            returnedValue = static_cast<long long int>(std::get<std::string>(paramStack.back().at(0)).size());
+            if (beginsWith(std::get<std::string>(paramStack.back().at(0)), "__LIST_POINTER__")) {
+                returnedValue = static_cast<long long int>(std::get<t_list>(listStack.at(getListPointer(std::get<std::string>(paramStack.back().at(0))))).size());
+            }
+            else {
+                returnedValue = static_cast<long long int>(std::get<std::string>(paramStack.back().at(0)).size());
+            }
         }
-        if (std::holds_alternative<t_list>(paramStack.back().at(0))) {
+        else if (std::holds_alternative<t_list>(paramStack.back().at(0))) {
             returnedValue = static_cast<long long int>(std::get<t_list>(paramStack.back().at(0)).size());
         }
     }
@@ -620,13 +625,13 @@ void ByteInterpreter::executePCF(std::string funcName)
             }
         }
         else if (std::holds_alternative<long long int>(paramStack.back().at(0))) {
-            for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(1)).size(); ++j) {
-                if (std::get<std::string>(paramStack.back().at(1)).at(j) == static_cast<char>(std::get<long long int>(paramStack.back().at(0)))) {
-                    returnedValue = static_cast<long long int>(j);
-                    found = true;
-                    break;
-                }
+        for (size_t j = 0; j < std::get<std::string>(paramStack.back().at(1)).size(); ++j) {
+            if (std::get<std::string>(paramStack.back().at(1)).at(j) == static_cast<char>(std::get<long long int>(paramStack.back().at(0)))) {
+                returnedValue = static_cast<long long int>(j);
+                found = true;
+                break;
             }
+        }
         }
         if (found == false)
             returnedValue = -1;
@@ -640,7 +645,7 @@ void ByteInterpreter::executePCF(std::string funcName)
             returnedValue = exp(std::get<long long int>(paramStack.back().at(0)));
         else if (std::holds_alternative<long double>(paramStack.back().at(0)))
             returnedValue = exp(std::get<long double>(paramStack.back().at(0)));
-    }
+        }
     else if (funcName == "sha256") {
         if (std::holds_alternative<std::string>(paramStack.back().at(0))) {
             returnedValue = sha256(std::get<std::string>(paramStack.back().at(0)));
@@ -715,20 +720,53 @@ void ByteInterpreter::executePCF(std::string funcName)
         returnedValue = popVector;
     }
     else if (funcName == "access") {
-        if (std::holds_alternative<std::string>(paramStack.back().at(0)) and beginsWith(std::get<std::string>(paramStack.back().at(0)), "__LIST_POINTER__")) {
-            long long int listptr = getListPointer(std::get<std::string>(paramStack.back().at(0)));
-            returnedValue = listStack.at(listptr);
+        long long int listPtr = 0;
+        if (std::get<t_list>(paramStack.back().at(1)).size() > 1) {
+            for (size_t k = 0; k < std::get<t_list>(paramStack.back().at(1)).size(); ++k) {
+                listPtr = getListPointer(std::get<std::string>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k)))));
+                if (k == std::get<t_list>(paramStack.back().at(1)).size() - 2) {
+                    if (std::holds_alternative<long long int>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1)))))
+                        returnedValue = std::get<long long int>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))));
+                    if (std::holds_alternative<long double>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1)))))
+                        returnedValue = std::get<long double>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))));
+                    if (std::holds_alternative<std::string>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1)))))
+                        returnedValue = std::get<std::string>(std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))));
+                }
+            }
         }
-        t_list searchVector = std::get<t_list>(paramStack.back().at(0));
-        if (std::holds_alternative<long long int>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<long long int>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
+        else {
+            if (std::holds_alternative<long long int>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0)))))
+                returnedValue = std::get<long long int>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))));
+            if (std::holds_alternative<long double>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0)))))
+                returnedValue = std::get<long double>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))));
+            if (std::holds_alternative<std::string>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0)))))
+                returnedValue = std::get<std::string>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))));
         }
-        if (std::holds_alternative<long double>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<long double>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
+    }
+    else if (funcName == "set") {
+        long long int listPtr = 0;
+        if (std::get<t_list>(paramStack.back().at(1)).size() > 1) {
+            for (size_t k = 0; k < std::get<t_list>(paramStack.back().at(1)).size(); ++k) {
+                listPtr = getListPointer(std::get<std::string>(std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k)))));
+                if (k == std::get<t_list>(paramStack.back().at(1)).size() - 2) {
+                    if (std::holds_alternative<long long int>(paramStack.back().at(2)))
+                        std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))) = std::get<long long int>(paramStack.back().at(2));
+                    if (std::holds_alternative<long double>(paramStack.back().at(2)))
+                        std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))) = std::get<long double>(paramStack.back().at(2));
+                    if (std::holds_alternative<std::string>(paramStack.back().at(2)))
+                        std::get<t_list>(listStack.at(listPtr)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(k + 1))) = std::get<std::string>(paramStack.back().at(2));
+                }
+            }
         }
-        if (std::holds_alternative<std::string>(searchVector.at(std::get<long long int>(paramStack.back().at(1))))) {
-            returnedValue = std::get<std::string>(searchVector.at(std::get<long long int>(paramStack.back().at(1))));
+        else {
+            if (std::holds_alternative<long long int>(paramStack.back().at(2)))
+                std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))) = std::get<long long int>(paramStack.back().at(2));
+            if (std::holds_alternative<long double>(paramStack.back().at(2)))
+                std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))) = std::get<long double>(paramStack.back().at(2));
+            if (std::holds_alternative<std::string>(paramStack.back().at(2)))
+                std::get<t_list>(paramStack.back().at(0)).at(std::get<long long int>(std::get<t_list>(paramStack.back().at(1)).at(0))) = std::get<std::string>(paramStack.back().at(2));
         }
+        returnedValue = std::get<t_list>(paramStack.back().at(0));
     }
     else if (funcName == "array") {
         t_list newArray;
